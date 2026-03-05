@@ -24,11 +24,9 @@ export function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
       {/* Mobile Header (Hidden on md+) */}
       <div className="md:hidden flex items-center justify-between p-5 pb-0 z-30 relative shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl neu-button-primary flex items-center justify-center shrink-0">
-            <span className="text-gold-500 font-bold text-xl drop-shadow-sm">P</span>
-          </div>
+          <img src="/logo.png" alt="David Aite" className="w-12 h-12 object-contain drop-shadow-md shrink-0 transition-transform duration-300 hover:scale-105" />
           <div>
-            <h1 className="font-bold text-emerald-500 text-xl tracking-wide leading-none">Prestige</h1>
+            <h1 className="font-bold text-emerald-500 text-xl tracking-tight leading-none">David Aite</h1>
             <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Finance</p>
           </div>
         </div>
@@ -57,16 +55,24 @@ export function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
           </button>
 
           <div>
-            <div className={cn("flex items-center mb-12", isCollapsed ? "justify-center" : "gap-4 px-2")}>
-              <div className="w-10 h-10 rounded-2xl neu-button-primary flex items-center justify-center shrink-0 transition-transform duration-500">
-                <span className="text-gold-500 font-bold text-xl drop-shadow-sm">P</span>
-              </div>
-              <h1 className={cn(
-                "font-bold text-emerald-500 tracking-wide transition-all duration-500 origin-left whitespace-nowrap overflow-hidden",
-                isCollapsed ? "max-w-0 opacity-0 scale-x-0" : "max-w-[200px] opacity-100 scale-x-100 text-2xl"
+            <div className={cn("flex items-center mb-10", isCollapsed ? "justify-center" : "gap-3 px-2")}>
+              <img
+                src="/logo.png"
+                alt="David Aite"
+                className={cn(
+                  "object-contain drop-shadow-md transition-all duration-500 shrink-0 hover:scale-105",
+                  isCollapsed ? "w-12 h-12" : "w-12 h-12"
+                )}
+              />
+              <div className={cn(
+                "transition-all duration-500 origin-left whitespace-nowrap overflow-hidden flex flex-col justify-center",
+                isCollapsed ? "max-w-0 opacity-0 scale-x-0" : "max-w-[200px] opacity-100 scale-x-100"
               )}>
-                Prestige
-              </h1>
+                <h1 className="font-bold text-emerald-500 text-xl tracking-tight leading-none pt-1">
+                  David Aite
+                </h1>
+                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Finance</p>
+              </div>
             </div>
 
             <nav className="space-y-3 relative">
