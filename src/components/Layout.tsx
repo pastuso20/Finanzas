@@ -22,36 +22,32 @@ export function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-gold-500 text-charcoal-900 flex flex-col md:flex-row overflow-hidden">
+    <div className="min-h-screen bg-[#f9fafb] text-charcoal-900 flex flex-col md:flex-row overflow-hidden">
 
-      {/* Mobile Header (Hidden on md+) */}
-      <div className="md:hidden flex items-center justify-between p-5 pb-0 z-30 relative shrink-0">
+      {/* Mobile Header (Refined UI/UX) */}
+      <div className="md:hidden flex items-center justify-between p-6 z-30 relative shrink-0 bg-white/50 backdrop-blur-md">
         <div className="flex items-center gap-3">
-          <div className="videogame-coin-wrap shrink-0">
+          <div className="avatar-gold-border">
             <img
               src="/logo.png"
-              alt="David Aite"
-              className="w-14 h-14 object-contain videogame-coin"
-              style={{ filter: 'contrast(1.1) saturate(1.1) drop-shadow(0 5px 10px rgba(0,0,0,0.1))' }}
+              alt={userName}
+              className="w-12 h-12 object-cover"
             />
           </div>
-          <div>
-            <h1 className="font-bold text-emerald-500 text-xl tracking-tight leading-none">{userName}</h1>
-            <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Finance</p>
+          <div className="flex flex-col">
+            <h1 className="font-bold text-emerald-900 text-lg tracking-tight leading-none">{userName}</h1>
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Finance</p>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           <button 
             onClick={() => setActiveTab('settings')}
-            className={cn(
-              "p-2.5 rounded-2xl transition-all",
-              activeTab === 'settings' ? "neu-button-primary" : "neu-button text-slate-500 hover:text-emerald-500"
-            )}
+            className="p-2.5 rounded-full bg-white shadow-sm border border-slate-100 text-slate-400 hover:text-emerald-600 transition-all"
           >
-            <Settings className="w-5 h-5 drop-shadow-sm" />
+            <Settings className="w-5 h-5" />
           </button>
-          <button className="neu-button p-2.5 rounded-2xl text-slate-500 hover:text-rose-500 transition-colors">
-            <LogOut className="w-5 h-5 drop-shadow-sm" />
+          <button className="p-2.5 rounded-full bg-white shadow-sm border border-slate-100 text-slate-400 hover:text-rose-600 transition-all">
+            <LogOut className="w-5 h-5" />
           </button>
         </div>
       </div>
@@ -185,9 +181,9 @@ export function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
         </div>
       </main>
 
-      {/* Mobile Bottom Navigation Bar (Hidden on md+) */}
+      {/* Mobile Bottom Navigation Bar (Refined) */}
       <div className="md:hidden fixed bottom-4 left-4 right-4 z-50">
-        <div className="border border-white/60 shadow-[0_-10px_40px_rgba(0,79,57,0.08)] rounded-[2rem] p-1.5 flex justify-between items-center relative overflow-hidden bg-white/60" style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
+        <div className="bg-white/90 backdrop-blur-lg border border-slate-100 shadow-2xl rounded-[2.5rem] p-2 flex justify-between items-center relative overflow-hidden">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -197,14 +193,19 @@ export function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
                 className={cn(
-                  "flex flex-col items-center justify-center w-[4.5rem] h-14 rounded-2xl transition-all duration-300 relative z-10",
-                  isActive ? "bg-emerald-500/15 text-emerald-600 shadow-inner border border-emerald-500/10" : "text-slate-500 hover:text-emerald-500"
+                  "flex flex-col items-center justify-center w-full h-14 rounded-2xl transition-all duration-300 relative z-10",
+                  isActive ? "text-emerald-800" : "text-slate-400"
                 )}
               >
-                <Icon className={cn("w-6 h-6 transition-transform duration-300", isActive ? "scale-110 drop-shadow-sm" : "")} />
-                <span className={cn("text-[10px] font-bold mt-1 tracking-wider uppercase transition-all duration-300", isActive ? "opacity-100" : "opacity-0 h-0 mt-0")}>
-                  {item.label.split(' ')[0]}
-                </span>
+                <Icon className={cn("w-6 h-6 transition-transform duration-300", isActive ? "scale-110" : "")} />
+                {isActive && (
+                  <>
+                    <span className="text-[10px] font-bold mt-1 tracking-wider uppercase">
+                      {item.label.split(' ')[0]}
+                    </span>
+                    <div className="bottom-nav-indicator" />
+                  </>
+                )}
               </button>
             );
           })}

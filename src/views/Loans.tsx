@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useFinanceStore } from '../store';
 import { Card, Button, Input, Label, cn } from '../components/ui';
-import { Plus, Minus, Users, Calendar, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Plus, Minus, Users, Calendar, AlertCircle, CheckCircle2, DollarSign } from 'lucide-react';
 import Decimal from 'decimal.js';
 import { format, differenceInDays } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -33,30 +33,66 @@ export function Loans() {
   const totalLent = activeLoans.reduce((acc, l) => acc.plus(new Decimal(l.principal)), new Decimal(0));
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      <header className="flex justify-between items-end">
-        <div>
-          <h2 className="text-3xl font-bold text-emerald-500 tracking-tight">Gestión de Préstamos</h2>
-          <p className="text-slate-600 mt-1">Sigue el dinero prestado a terceros</p>
+    <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500 pb-20 md:pb-0">
+      <header className="flex flex-col md:flex-row md:justify-between md:items-end gap-6">
+        <div className="flex flex-col">
+          <h2 className="text-4xl md:text-5xl font-bold text-emerald-900 tracking-tight font-serif">Préstamos</h2>
+          <p className="text-slate-400 text-sm md:text-base mt-2">Sigue el dinero prestado a terceros</p>
         </div>
-        <Button onClick={() => setShowAddForm(!showAddForm)} className="gap-2">
+        
+        {/* New Loan Button - Mobile Highlighted */}
+        <button 
+          onClick={() => setShowAddForm(!showAddForm)}
+          className="md:hidden w-full flex items-center justify-center gap-3 bg-emerald-900 text-white py-4 rounded-3xl shadow-xl shadow-emerald-900/20 active:scale-[0.98] transition-all"
+        >
+          <Plus className="w-5 h-5 text-accent-gold" />
+          <span className="font-bold text-sm tracking-wide">Nuevo Préstamo</span>
+        </button>
+
+        {/* Desktop New Loan Button */}
+        <Button onClick={() => setShowAddForm(!showAddForm)} className="hidden md:flex gap-2 rounded-2xl px-8 h-12">
           {showAddForm ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
           {showAddForm ? 'Cancelar' : 'Nuevo Préstamo'}
         </Button>
       </header>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="flex flex-col justify-center">
-          <p className="text-sm text-slate-500 font-bold uppercase tracking-wider mb-2">Total Préstamos Activos</p>
-          <p className="text-3xl font-bold text-charcoal-900 font-mono drop-shadow-sm">{formatCurrency(totalLent)}</p>
+      {/* Summary Cards - Mobile Expert UI */}
+      <div className="md:hidden pt-2">
+        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4 ml-1">RESUMEN DE PRÉSTAMOS</p>
+        <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden divide-y divide-slate-50">
+          <div className="p-6 flex justify-between items-center">
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">TOTAL PRESTADO</p>
+            <p className="text-xl font-bold text-emerald-900 font-mono tracking-tighter">{formatCurrency(totalLent)}</p>
+          </div>
+          <div className="p-6 flex justify-between items-center bg-slate-50/30">
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">PRESTATARIOS</p>
+            <div className="flex items-center gap-2">
+              <Users className="w-4 h-4 text-emerald-700" />
+              <p className="text-lg font-bold text-emerald-900 font-mono tracking-tighter">{activeLoans.length} Activos</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop Summary Cards */}
+      <div className="hidden md:grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card className="flex items-center gap-4 bg-white border-none shadow-sm">
+          <div className="w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center">
+            <DollarSign className="w-7 h-7 text-emerald-700" />
+          </div>
+          <div>
+            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Total Préstamos Activos</p>
+            <p className="text-3xl font-bold text-emerald-900 font-mono">{formatCurrency(totalLent)}</p>
+          </div>
         </Card>
 
-        <Card className="flex flex-col justify-center">
-          <p className="text-sm text-slate-500 font-bold uppercase tracking-wider mb-2">Prestatarios Activos</p>
-          <div className="flex items-center gap-3">
-            <Users className="w-8 h-8 text-emerald-500 drop-shadow-sm" />
-            <p className="text-3xl font-bold text-charcoal-900 font-mono drop-shadow-sm">{activeLoans.length}</p>
+        <Card className="flex items-center gap-4 bg-white border-none shadow-sm">
+          <div className="w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center">
+            <Users className="w-7 h-7 text-emerald-700" />
+          </div>
+          <div>
+            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Prestatarios Activos</p>
+            <p className="text-3xl font-bold text-emerald-900 font-mono">{activeLoans.length}</p>
           </div>
         </Card>
       </div>

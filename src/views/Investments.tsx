@@ -34,41 +34,78 @@ export function Investments() {
   const overallROI = totalInvested.isZero() ? new Decimal(0) : netProfit.dividedBy(totalInvested).times(100);
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      <header className="flex justify-between items-end">
-        <div>
-          <h2 className="text-3xl font-bold text-emerald-500 tracking-tight">Emprendimientos e Inversiones</h2>
-          <p className="text-slate-600 mt-1">Sigue el rendimiento de tus negocios y proyectos</p>
+    <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500 pb-20 md:pb-0">
+      <header className="flex flex-col md:flex-row md:justify-between md:items-end gap-6">
+        <div className="flex flex-col">
+          <h2 className="text-4xl md:text-5xl font-bold text-emerald-900 tracking-tight font-serif">Inversiones</h2>
+          <p className="text-slate-400 text-sm md:text-base mt-2">Sigue el rendimiento de tus proyectos</p>
         </div>
-        <Button onClick={() => setShowAddForm(!showAddForm)} className="gap-2">
+        
+        {/* New Project Button - Mobile Highlighted */}
+        <button 
+          onClick={() => setShowAddForm(!showAddForm)}
+          className="md:hidden w-full flex items-center justify-center gap-3 bg-emerald-900 text-white py-4 rounded-3xl shadow-xl shadow-emerald-900/20 active:scale-[0.98] transition-all"
+        >
+          <Plus className="w-5 h-5 text-accent-gold" />
+          <span className="font-bold text-sm tracking-wide">Nuevo Proyecto</span>
+        </button>
+
+        {/* Desktop New Project Button */}
+        <Button onClick={() => setShowAddForm(!showAddForm)} className="hidden md:flex gap-2 rounded-2xl px-8 h-12">
           {showAddForm ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
           {showAddForm ? 'Cancelar' : 'Nuevo Proyecto'}
         </Button>
       </header>
 
-      {/* Summary Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="flex flex-col justify-center">
-          <p className="text-sm text-slate-500 font-bold uppercase tracking-wider mb-2">Capital Total Invertido</p>
-          <p className="text-3xl font-bold text-charcoal-900 font-mono drop-shadow-sm">{formatCurrency(totalInvested)}</p>
+      {/* Summary Metrics - Mobile Expert UI */}
+      <div className="md:hidden pt-2">
+        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4 ml-1">RESUMEN DEL PORTAFOLIO</p>
+        <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden divide-y divide-slate-50">
+          <div className="p-6 flex justify-between items-center">
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">CAPITAL TOTAL</p>
+            <p className="text-xl font-bold text-emerald-900 font-mono tracking-tighter">{formatCurrency(totalInvested)}</p>
+          </div>
+          <div className="p-6 flex justify-between items-center bg-slate-50/30">
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">VALOR ACTUAL</p>
+            <p className="text-xl font-bold text-emerald-900 font-mono tracking-tighter">{formatCurrency(totalCurrentValue)}</p>
+          </div>
+          <div className="p-6 flex justify-between items-center">
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">BENEFICIO / ROI</p>
+            <div className="text-right">
+              <p className={cn("text-xl font-bold font-mono tracking-tighter", netProfit.isPositive() ? "text-emerald-600" : "text-rose-600")}>
+                {netProfit.isPositive() ? '+' : ''}{formatCurrency(netProfit)}
+              </p>
+              <p className={cn("text-[10px] font-bold mt-1", overallROI.isPositive() ? "text-emerald-600" : "text-rose-600")}>
+                {overallROI.isPositive() ? '+' : ''}{overallROI.toNumber().toFixed(2)}%
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop Summary Metrics */}
+      <div className="hidden md:grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="flex flex-col justify-center bg-white border-none shadow-sm">
+          <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mb-2">Capital Total Invertido</p>
+          <p className="text-3xl font-bold text-emerald-900 font-mono">{formatCurrency(totalInvested)}</p>
         </Card>
 
-        <Card className="flex flex-col justify-center">
-          <p className="text-sm text-slate-500 font-bold uppercase tracking-wider mb-2">Valor Actual del Portafolio</p>
-          <p className="text-3xl font-bold text-charcoal-900 font-mono drop-shadow-sm">{formatCurrency(totalCurrentValue)}</p>
+        <Card className="flex flex-col justify-center bg-white border-none shadow-sm">
+          <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mb-2">Valor Actual del Portafolio</p>
+          <p className="text-3xl font-bold text-emerald-900 font-mono">{formatCurrency(totalCurrentValue)}</p>
         </Card>
 
-        <Card className="flex flex-col justify-center">
-          <p className="text-sm text-slate-500 font-bold uppercase tracking-wider mb-2">Beneficio Neto / ROI</p>
+        <Card className="flex flex-col justify-center bg-white border-none shadow-sm">
+          <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mb-2">Beneficio Neto / ROI</p>
           <div className="flex items-end gap-3">
             <p className={cn(
-              "text-3xl font-bold font-mono drop-shadow-sm",
+              "text-3xl font-bold font-mono",
               netProfit.isPositive() ? "text-emerald-600" : netProfit.isNegative() ? "text-rose-600" : "text-charcoal-900"
             )}>
               {netProfit.isPositive() ? '+' : ''}{formatCurrency(netProfit)}
             </p>
             <p className={cn(
-              "text-lg font-bold mb-1 drop-shadow-sm",
+              "text-lg font-bold mb-1",
               overallROI.isPositive() ? "text-emerald-600" : overallROI.isNegative() ? "text-rose-600" : "text-slate-500"
             )}>
               ({overallROI.isPositive() ? '+' : ''}{overallROI.toNumber().toFixed(2)}%)

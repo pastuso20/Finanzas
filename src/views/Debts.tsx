@@ -33,38 +33,73 @@ export function Debts() {
   const totalPending = pendingDebts.reduce((acc, d) => acc.plus(new Decimal(d.amount)), new Decimal(0));
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      <header className="flex justify-between items-end">
-        <div>
-          <h2 className="text-3xl font-bold text-emerald-500 tracking-tight">Gestión de Deudas</h2>
-          <p className="text-slate-600 mt-1">Controla tus compromisos financieros y pagos</p>
+    <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500 pb-20 md:pb-0">
+      <header className="flex flex-col md:flex-row md:justify-between md:items-end gap-6">
+        <div className="flex flex-col">
+          <h2 className="text-4xl md:text-5xl font-bold text-emerald-900 tracking-tight font-serif">Deudas</h2>
+          <p className="text-slate-400 text-sm md:text-base mt-2">Controla tus compromisos financieros</p>
         </div>
-        <Button onClick={() => setShowAddForm(!showAddForm)} className="gap-2">
+        
+        {/* New Debt Button - Mobile Highlighted */}
+        <button 
+          onClick={() => setShowAddForm(!showAddForm)}
+          className="md:hidden w-full flex items-center justify-center gap-3 bg-emerald-900 text-white py-4 rounded-3xl shadow-xl shadow-emerald-900/20 active:scale-[0.98] transition-all"
+        >
+          <Plus className="w-5 h-5 text-accent-gold" />
+          <span className="font-bold text-sm tracking-wide">Nueva Deuda</span>
+        </button>
+
+        {/* Desktop New Debt Button */}
+        <Button onClick={() => setShowAddForm(!showAddForm)} className="hidden md:flex gap-2 rounded-2xl px-8 h-12">
           {showAddForm ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
           {showAddForm ? 'Cancelar' : 'Nueva Deuda'}
         </Button>
       </header>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="flex flex-col justify-center">
-          <p className="text-sm text-slate-500 font-bold uppercase tracking-wider mb-2">Total Pendiente de Pago</p>
-          <p className="text-3xl font-bold text-charcoal-900 font-mono drop-shadow-sm">{formatCurrency(totalPending)}</p>
+      {/* Summary Cards - Mobile Expert UI */}
+      <div className="md:hidden pt-2">
+        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4 ml-1">RESUMEN DE DEUDAS</p>
+        <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden divide-y divide-slate-50">
+          <div className="p-6 flex justify-between items-center">
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">TOTAL PENDIENTE</p>
+            <p className="text-xl font-bold text-rose-600 font-mono tracking-tighter">{formatCurrency(totalPending)}</p>
+          </div>
+          <div className="p-6 flex justify-between items-center bg-slate-50/30">
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">ESTADO</p>
+            <div className="flex gap-4">
+              <div className="flex items-center gap-1.5">
+                <div className="w-2 h-2 rounded-full bg-rose-500" />
+                <span className="text-xs font-bold text-emerald-900">{pendingDebts.length} Pend.</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                <span className="text-xs font-bold text-emerald-900">{paidDebts.length} Pag.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop Summary Cards */}
+      <div className="hidden md:grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="flex flex-col justify-center bg-white border-none shadow-sm">
+          <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mb-2">Total Pendiente de Pago</p>
+          <p className="text-3xl font-bold text-rose-600 font-mono">{formatCurrency(totalPending)}</p>
         </Card>
 
-        <Card className="flex flex-col justify-center">
-          <p className="text-sm text-slate-500 font-bold uppercase tracking-wider mb-2">Deudas Pendientes</p>
+        <Card className="flex flex-col justify-center bg-white border-none shadow-sm">
+          <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mb-2">Deudas Pendientes</p>
           <div className="flex items-center gap-3">
-            <AlertCircle className="w-8 h-8 text-rose-500 drop-shadow-sm" />
-            <p className="text-3xl font-bold text-charcoal-900 font-mono drop-shadow-sm">{pendingDebts.length}</p>
+            <AlertCircle className="w-8 h-8 text-rose-500" />
+            <p className="text-3xl font-bold text-emerald-900 font-mono">{pendingDebts.length}</p>
           </div>
         </Card>
 
-        <Card className="flex flex-col justify-center">
-          <p className="text-sm text-slate-500 font-bold uppercase tracking-wider mb-2">Deudas Pagadas</p>
+        <Card className="flex flex-col justify-center bg-white border-none shadow-sm">
+          <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mb-2">Deudas Pagadas</p>
           <div className="flex items-center gap-3">
-            <CheckCircle2 className="w-8 h-8 text-emerald-500 drop-shadow-sm" />
-            <p className="text-3xl font-bold text-charcoal-900 font-mono drop-shadow-sm">{paidDebts.length}</p>
+            <CheckCircle2 className="w-8 h-8 text-emerald-500" />
+            <p className="text-3xl font-bold text-emerald-900 font-mono">{paidDebts.length}</p>
           </div>
         </Card>
       </div>

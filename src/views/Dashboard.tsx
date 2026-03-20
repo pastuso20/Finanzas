@@ -40,53 +40,59 @@ export function Dashboard() {
   );
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 md:gap-0">
-        <div className="w-full">
-          <h2 className="text-3xl md:text-4xl font-bold text-emerald-500 tracking-tight leading-tight">Resumen General</h2>
-          <p className="text-sm md:text-base text-slate-600 mt-1">Tu centro de comando financiero</p>
+    <div className="space-y-6 md:space-y-10 animate-in fade-in duration-500 pb-20 md:pb-0">
+      {/* Refined Header - Expert UI */}
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 md:gap-0">
+        <div className="flex flex-col">
+          <h2 className="text-4xl md:text-5xl font-bold text-emerald-900 tracking-tight font-serif">Resumen General</h2>
+          <p className="text-slate-400 text-sm md:text-base mt-2">Tu centro de comando financiero</p>
         </div>
-        <div className="text-left md:text-right w-full md:w-auto bg-white/40 md:bg-transparent p-4 md:p-0 rounded-2xl md:rounded-none border border-white/50 md:border-none shadow-sm md:shadow-none">
-          <p className="text-xs md:text-sm text-slate-500 font-bold uppercase tracking-wider">Patrimonio Neto Total</p>
-          <h3 className="text-3xl md:text-4xl font-bold text-charcoal-900 mt-1 font-mono">
-            {formatCurrency(netWorth)}
-          </h3>
-          <div className="flex items-center justify-start md:justify-end gap-1 text-emerald-500 text-sm mt-1 font-medium">
-            <TrendingUp className="w-4 h-4" />
-            <span>+12.5% este mes</span>
+        
+        {/* Patrimonio Neto - Mobile Premium UI */}
+        <div className="w-full md:w-auto bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-emerald-900/5 p-8 md:p-10 flex flex-col md:items-end relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50/50 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110" />
+          <p className="text-[10px] md:text-xs text-slate-400 font-bold uppercase tracking-[0.3em] mb-2 relative">PATRIMONIO NETO TOTAL</p>
+          <div className="flex flex-col md:items-end relative">
+            <h3 className="text-4xl md:text-5xl font-bold text-emerald-900 font-mono tracking-tighter">
+              {formatCurrency(netWorth)}
+            </h3>
+            <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50 px-4 py-1.5 rounded-full text-[10px] md:text-xs mt-4 w-fit font-bold border border-emerald-100/50">
+              <TrendingUp className="w-3.5 h-3.5" />
+              <span>+12.5% este mes</span>
+            </div>
           </div>
         </div>
       </header>
 
-      {/* Metric Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl neu-inset flex items-center justify-center">
-            <DollarSign className="w-7 h-7 text-emerald-500 drop-shadow-sm" />
+      {/* Metric Cards - Optimized for Mobile Expert UI */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-8">
+        <Card className="flex items-center gap-5 p-6 md:p-8 border-none shadow-sm bg-white hover:shadow-md transition-shadow">
+          <div className="w-14 h-14 md:w-16 md:h-16 rounded-[1.5rem] bg-slate-50 flex items-center justify-center shrink-0">
+            <DollarSign className="w-7 h-7 md:w-8 md:h-8 text-emerald-700" />
           </div>
-          <div>
-            <p className="text-sm text-slate-500 font-bold uppercase tracking-wider">Activos Líquidos</p>
-            <p className="text-2xl font-bold text-charcoal-900 font-mono drop-shadow-sm">{formatCurrency(cashBalance)}</p>
-          </div>
-        </Card>
-
-        <Card className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl neu-inset flex items-center justify-center">
-            <Activity className="w-7 h-7 text-emerald-500 drop-shadow-sm" />
-          </div>
-          <div>
-            <p className="text-sm text-slate-500 font-bold uppercase tracking-wider">Inversiones</p>
-            <p className="text-2xl font-bold text-charcoal-900 font-mono drop-shadow-sm">{formatCurrency(totalInvestments)}</p>
+          <div className="flex flex-col gap-1">
+            <p className="text-[10px] md:text-xs text-slate-400 font-bold uppercase tracking-widest">ACTIVOS LÍQUIDOS</p>
+            <p className="text-2xl md:text-3xl font-bold text-emerald-900 font-mono tracking-tighter">{formatCurrency(cashBalance)}</p>
           </div>
         </Card>
 
-        <Card className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl neu-inset flex items-center justify-center">
-            <AlertCircle className="w-7 h-7 text-rose-500 drop-shadow-sm" />
+        <Card className="flex items-center gap-5 p-6 md:p-8 border-none shadow-sm bg-white hover:shadow-md transition-shadow">
+          <div className="w-14 h-14 md:w-16 md:h-16 rounded-[1.5rem] bg-slate-50 flex items-center justify-center shrink-0">
+            <Activity className="w-7 h-7 md:w-8 md:h-8 text-emerald-700" />
           </div>
-          <div>
-            <p className="text-sm text-slate-500 font-bold uppercase tracking-wider">Préstamos Activos</p>
-            <p className="text-2xl font-bold text-charcoal-900 font-mono drop-shadow-sm">{formatCurrency(totalLoans)}</p>
+          <div className="flex flex-col gap-1">
+            <p className="text-[10px] md:text-xs text-slate-400 font-bold uppercase tracking-widest">INVERSIONES</p>
+            <p className="text-2xl md:text-3xl font-bold text-emerald-900 font-mono tracking-tighter">{formatCurrency(totalInvestments)}</p>
+          </div>
+        </Card>
+
+        <Card className="flex items-center gap-5 p-6 md:p-8 border-none shadow-sm bg-white hover:shadow-md transition-shadow">
+          <div className="w-14 h-14 md:w-16 md:h-16 rounded-[1.5rem] bg-slate-50 flex items-center justify-center shrink-0">
+            <AlertCircle className="w-7 h-7 md:w-8 md:h-8 text-rose-500" />
+          </div>
+          <div className="flex flex-col gap-1">
+            <p className="text-[10px] md:text-xs text-slate-400 font-bold uppercase tracking-widest">DEUDAS TOTALES</p>
+            <p className="text-2xl md:text-3xl font-bold text-rose-600 font-mono tracking-tighter">{formatCurrency(totalDebts)}</p>
           </div>
         </Card>
       </div>
