@@ -3,6 +3,7 @@ import { Transaction, Loan, Investment, Debt, NetWorthDataPoint } from './types'
 import Decimal from 'decimal.js';
 import { subMonths, format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { supabase } from './supabase';
 
 interface FinanceState {
   userName: string;
@@ -11,119 +12,194 @@ interface FinanceState {
   loans: Loan[];
   investments: Investment[];
   debts: Debt[];
+  isLoading: boolean;
 
   // Actions
-  setUserName: (name: string) => void;
-  setInitialBalance: (amount: string) => void;
-  addTransaction: (tx: Omit<Transaction, 'id'>) => void;
-  addLoan: (loan: Omit<Loan, 'id'>) => void;
-  addInvestment: (inv: Omit<Investment, 'id'>) => void;
-  updateInvestmentValue: (id: string, newValue: string) => void;
-  addDebt: (debt: Omit<Debt, 'id'>) => void;
-  toggleDebtStatus: (id: string) => void;
-  updateDebtAmount: (id: string, newAmount: string) => void;
-  updateTransactionAmount: (id: string, newAmount: string) => void;
-  updateLoanPrincipal: (id: string, newPrincipal: string) => void;
-  clearAllData: () => void;
-  deleteTransaction: (id: string) => void;
-  deleteLoan: (id: string) => void;
-  deleteInvestment: (id: string) => void;
-  deleteDebt: (id: string) => void;
+  fetchData: () => Promise<void>;
+  setUserName: (name: string) => Promise<void>;
+  setInitialBalance: (amount: string) => Promise<void>;
+  addTransaction: (tx: Omit<Transaction, 'id'>) => Promise<void>;
+  addLoan: (loan: Omit<Loan, 'id'>) => Promise<void>;
+  addInvestment: (inv: Omit<Investment, 'id'>) => Promise<void>;
+  updateInvestmentValue: (id: string, newValue: string) => Promise<void>;
+  addDebt: (debt: Omit<Debt, 'id'>) => Promise<void>;
+  toggleDebtStatus: (id: string) => Promise<void>;
+  updateDebtAmount: (id: string, newAmount: string) => Promise<void>;
+  updateTransactionAmount: (id: string, newAmount: string) => Promise<void>;
+  updateLoanPrincipal: (id: string, newPrincipal: string) => Promise<void>;
+  clearAllData: () => Promise<void>;
+  deleteTransaction: (id: string) => Promise<void>;
+  deleteLoan: (id: string) => Promise<void>;
+  deleteInvestment: (id: string) => Promise<void>;
+  deleteDebt: (id: string) => Promise<void>;
 }
 
-// Generate some initial mock data for the dashboard
-const generateMockNetWorth = (): NetWorthDataPoint[] => {
-  const data: NetWorthDataPoint[] = [];
-  let currentVal = 50000000;
-  for (let i = 6; i >= 0; i--) {
-    const date = subMonths(new Date(), i);
-    data.push({
-      date: format(date, 'MMM yyyy', { locale: es }),
-      value: currentVal
-    });
-    currentVal += Math.random() * 5000000 - 1000000; // Random fluctuation
-  }
-  return data;
-};
-
-export const useFinanceStore = create<FinanceState>((set) => ({
+export const useFinanceStore = create<FinanceState>((set, get) => ({
   userName: 'David Aite',
-  initialBalance: '25000000',
-  transactions: [
-    { id: '1', type: 'income', amount: '8500000', category: 'Salario', date: new Date().toISOString(), notes: 'Salario mensual' },
-    { id: '2', type: 'expense', amount: '120500', category: 'Restaurante', date: new Date().toISOString(), notes: 'Cena en restaurante' },
-  ],
-  loans: [
-    { id: '1', borrower: 'Alice Gómez', principal: '5000000', interestRate: '5.0', startDate: subMonths(new Date(), 2).toISOString(), dueDate: new Date(Date.now() + 86400000 * 15).toISOString(), status: 'active' }
-  ],
-  investments: [
-    { id: '1', assetName: 'Inversión en Startup', description: 'Tecnología agrícola', initialInvestment: '15000000', currentValue: '18500000', purchaseDate: subMonths(new Date(), 12).toISOString() },
-    { id: '2', assetName: 'Restaurante Local', description: 'Participación 10%', initialInvestment: '25000000', currentValue: '24100000', purchaseDate: subMonths(new Date(), 6).toISOString() },
-  ],
-  debts: [
-    { id: '1', creditor: 'Banco Nacional', amount: '2500000', dueDate: subMonths(new Date(), -1).toISOString(), status: 'pending', notes: 'Préstamo personal' },
-    { id: '2', creditor: 'Tarjeta de Crédito', amount: '850000', dueDate: subMonths(new Date(), -2).toISOString(), status: 'paid', notes: 'Pago de equipo' }
-  ],
+  initialBalance: '0',
+  transactions: [],
+  loans: [],
+  investments: [],
+  debts: [],
+  isLoading: true,
 
-  setUserName: (name) => set({ userName: name }),
-  setInitialBalance: (amount) => set({ initialBalance: amount }),
+  fetchData: async () => {
+    set({ isLoading: true });
+    try {
+      const [
+        { data: profile },
+        { data: txs },
+        { data: lns },
+        { data: invs },
+        { data: dbts }
+      ] = await Promise.all([
+        supabase.from('profile').select('*').single(),
+        supabase.from('transactions').select('*').order('date', { ascending: false }),
+        supabase.from('loans').select('*').order('due_date', { ascending: true }),
+        supabase.from('investments').select('*').order('purchase_date', { ascending: false }),
+        supabase.from('debts').select('*').order('due_date', { ascending: true })
+      ]);
 
-  addTransaction: (tx) => set((state) => ({
-    transactions: [...state.transactions, { ...tx, id: Math.random().toString(36).substring(7) }]
-  })),
+      if (profile) {
+        set({ userName: profile.user_name, initialBalance: profile.initial_balance.toString() });
+      } else {
+        // Create initial profile if it doesn't exist
+        await supabase.from('profile').insert({ user_name: 'David Aite', initial_balance: 0 });
+      }
 
-  addLoan: (loan) => set((state) => ({
-    loans: [...state.loans, { ...loan, id: Math.random().toString(36).substring(7) }]
-  })),
+      set({
+        transactions: txs || [],
+        loans: lns || [],
+        investments: invs || [],
+        debts: dbts || [],
+        isLoading: false
+      });
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      set({ isLoading: false });
+    }
+  },
 
-  addInvestment: (inv) => set((state) => ({
-    investments: [...state.investments, { ...inv, id: Math.random().toString(36).substring(7) }]
-  })),
+  setUserName: async (name) => {
+    const { data, error } = await supabase.from('profile').update({ user_name: name }).eq('id', (await supabase.from('profile').select('id').single()).data?.id);
+    if (!error) set({ userName: name });
+  },
 
-  updateInvestmentValue: (id, newValue) => set((state) => ({
-    investments: state.investments.map(inv => inv.id === id ? { ...inv, currentValue: newValue } : inv)
-  })),
+  setInitialBalance: async (amount) => {
+    const { data, error } = await supabase.from('profile').update({ initial_balance: parseFloat(amount) }).eq('id', (await supabase.from('profile').select('id').single()).data?.id);
+    if (!error) set({ initialBalance: amount });
+  },
 
-  addDebt: (debt) => set((state) => ({
-    debts: [...state.debts, { ...debt, id: Math.random().toString(36).substring(7) }]
-  })),
+  addTransaction: async (tx) => {
+    const { data, error } = await supabase.from('transactions').insert({
+      type: tx.type,
+      amount: parseFloat(tx.amount),
+      category: tx.category,
+      date: tx.date,
+      notes: tx.notes
+    }).select().single();
+    if (!error && data) set((state) => ({ transactions: [data, ...state.transactions] }));
+  },
 
-  toggleDebtStatus: (id) => set((state) => ({
-    debts: state.debts.map(debt => debt.id === id ? { ...debt, status: debt.status === 'pending' ? 'paid' : 'pending' } : debt)
-  })),
+  addLoan: async (loan) => {
+    const { data, error } = await supabase.from('loans').insert({
+      borrower: loan.borrower,
+      principal: parseFloat(loan.principal),
+      interest_rate: parseFloat(loan.interestRate),
+      due_date: loan.dueDate,
+      start_date: loan.startDate,
+      status: loan.status
+    }).select().single();
+    if (!error && data) set((state) => ({ loans: [data, ...state.loans] }));
+  },
 
-  updateDebtAmount: (id, newAmount) => set((state) => ({
-    debts: state.debts.map(debt => debt.id === id ? { ...debt, amount: newAmount } : debt)
-  })),
+  addInvestment: async (inv) => {
+    const { data, error } = await supabase.from('investments').insert({
+      asset_name: inv.assetName,
+      description: inv.description,
+      initial_investment: parseFloat(inv.initialInvestment),
+      current_value: parseFloat(inv.currentValue),
+      purchase_date: inv.purchaseDate
+    }).select().single();
+    if (!error && data) set((state) => ({ investments: [data, ...state.investments] }));
+  },
 
-  updateTransactionAmount: (id, newAmount) => set((state) => ({
-    transactions: state.transactions.map(t => t.id === id ? { ...t, amount: newAmount } : t)
-  })),
+  updateInvestmentValue: async (id, newValue) => {
+    const { error } = await supabase.from('investments').update({ current_value: parseFloat(newValue) }).eq('id', id);
+    if (!error) set((state) => ({
+      investments: state.investments.map(inv => inv.id === id ? { ...inv, currentValue: newValue } : inv)
+    }));
+  },
 
-  updateLoanPrincipal: (id, newPrincipal) => set((state) => ({
-    loans: state.loans.map(l => l.id === id ? { ...l, principal: newPrincipal } : l)
-  })),
+  addDebt: async (debt) => {
+    const { data, error } = await supabase.from('debts').insert({
+      creditor: debt.creditor,
+      amount: parseFloat(debt.amount),
+      due_date: debt.dueDate,
+      status: debt.status,
+      notes: debt.notes
+    }).select().single();
+    if (!error && data) set((state) => ({ debts: [data, ...state.debts] }));
+  },
 
-  clearAllData: () => set({
-    transactions: [],
-    loans: [],
-    investments: [],
-    debts: []
-  }),
+  toggleDebtStatus: async (id) => {
+    const debt = get().debts.find(d => d.id === id);
+    if (!debt) return;
+    const newStatus = debt.status === 'pending' ? 'paid' : 'pending';
+    const { error } = await supabase.from('debts').update({ status: newStatus }).eq('id', id);
+    if (!error) set((state) => ({
+      debts: state.debts.map(d => d.id === id ? { ...d, status: newStatus } : d)
+    }));
+  },
 
-  deleteTransaction: (id) => set((state) => ({
-    transactions: state.transactions.filter(t => t.id !== id)
-  })),
+  updateDebtAmount: async (id, newAmount) => {
+    const { error } = await supabase.from('debts').update({ amount: parseFloat(newAmount) }).eq('id', id);
+    if (!error) set((state) => ({
+      debts: state.debts.map(d => d.id === id ? { ...d, amount: newAmount } : d)
+    }));
+  },
 
-  deleteLoan: (id) => set((state) => ({
-    loans: state.loans.filter(l => l.id !== id)
-  })),
+  updateTransactionAmount: async (id, newAmount) => {
+    const { error } = await supabase.from('transactions').update({ amount: parseFloat(newAmount) }).eq('id', id);
+    if (!error) set((state) => ({
+      transactions: state.transactions.map(t => t.id === id ? { ...t, amount: newAmount } : t)
+    }));
+  },
 
-  deleteInvestment: (id) => set((state) => ({
-    investments: state.investments.filter(inv => inv.id !== id)
-  })),
+  updateLoanPrincipal: async (id, newPrincipal) => {
+    const { error } = await supabase.from('loans').update({ principal: parseFloat(newPrincipal) }).eq('id', id);
+    if (!error) set((state) => ({
+      loans: state.loans.map(l => l.id === id ? { ...l, principal: newPrincipal } : l)
+    }));
+  },
 
-  deleteDebt: (id) => set((state) => ({
-    debts: state.debts.filter(d => d.id !== id)
-  }))
+  clearAllData: async () => {
+    await Promise.all([
+      supabase.from('transactions').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+      supabase.from('loans').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+      supabase.from('investments').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+      supabase.from('debts').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+    ]);
+    set({ transactions: [], loans: [], investments: [], debts: [] });
+  },
+
+  deleteTransaction: async (id) => {
+    const { error } = await supabase.from('transactions').delete().eq('id', id);
+    if (!error) set((state) => ({ transactions: state.transactions.filter(t => t.id !== id) }));
+  },
+
+  deleteLoan: async (id) => {
+    const { error } = await supabase.from('loans').delete().eq('id', id);
+    if (!error) set((state) => ({ loans: state.loans.filter(l => l.id !== id) }));
+  },
+
+  deleteInvestment: async (id) => {
+    const { error } = await supabase.from('investments').delete().eq('id', id);
+    if (!error) set((state) => ({ investments: state.investments.filter(inv => inv.id !== id) }));
+  },
+
+  deleteDebt: async (id) => {
+    const { error } = await supabase.from('debts').delete().eq('id', id);
+    if (!error) set((state) => ({ debts: state.debts.filter(d => d.id !== id) }));
+  }
 }));
