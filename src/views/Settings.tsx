@@ -45,98 +45,117 @@ export function Settings() {
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* User Profile Section */}
-        <Card className="space-y-6">
-          <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
-            <User className="w-6 h-6 text-emerald-500" />
-            <h3 className="text-xl font-bold text-charcoal-900">Perfil de Usuario</h3>
+        {/* User Profile Section - Expert UI Redesign */}
+        <Card className="space-y-8 border-none shadow-sm bg-white p-8 md:p-10">
+          <div className="flex items-center gap-4 border-b border-slate-50 pb-6">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center">
+              <User className="w-6 h-6 text-emerald-700" />
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold text-emerald-900 tracking-tight font-serif">Perfil de Usuario</h3>
+              <p className="text-xs text-slate-400 font-medium">Personaliza tu identidad y saldo base</p>
+            </div>
           </div>
           
-          <div className="space-y-4">
-            <div className="p-4 rounded-2xl neu-inset bg-white/50 relative group">
-              <p className="text-sm text-slate-500 font-bold uppercase tracking-wider mb-1">Nombre actual</p>
-              {isEditingName ? (
-                <div className="flex items-center gap-2">
-                  <Input 
-                    value={newName} 
-                    onChange={e => setNewName(e.target.value)} 
-                    className="h-9"
-                    autoFocus
-                  />
-                  <Button 
-                    size="sm" 
-                    onClick={() => {
-                      setUserName(newName);
-                      setIsEditingName(false);
-                    }}
-                  >
-                    Guardar
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    onClick={() => setIsEditingName(false)}
-                  >
-                    Cancelar
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex justify-between items-center">
-                  <p className="text-lg font-bold text-charcoal-900">{userName}</p>
-                  <button 
-                    onClick={() => setIsEditingName(true)}
-                    className="text-slate-400 hover:text-emerald-500 opacity-0 group-hover:opacity-100 transition-all"
-                  >
-                    <Edit3 className="w-4 h-4" />
-                  </button>
-                </div>
-              )}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Nombre de Usuario */}
+            <div className="space-y-3">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] ml-1">NOMBRE ACTUAL</p>
+              <div className="p-6 rounded-[2rem] bg-slate-50/50 border border-slate-100 relative group min-h-[80px] flex items-center justify-between overflow-hidden">
+                {isEditingName ? (
+                  <div className="flex flex-col w-full gap-4 animate-in slide-in-from-bottom-2 duration-300">
+                    <Input 
+                      value={newName} 
+                      onChange={e => setNewName(e.target.value)} 
+                      className="h-12 rounded-2xl border-slate-200 bg-white shadow-sm focus:ring-emerald-900/5"
+                      autoFocus
+                    />
+                    <div className="flex gap-2">
+                      <Button 
+                        className="flex-1 h-11 rounded-xl bg-emerald-900 font-bold"
+                        onClick={() => {
+                          setUserName(newName);
+                          setIsEditingName(false);
+                        }}
+                      >
+                        Guardar
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        className="flex-1 h-11 rounded-xl font-bold border-slate-200"
+                        onClick={() => setIsEditingName(false)}
+                      >
+                        Cancelar
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-xl font-bold text-emerald-900 truncate pr-8">{userName}</p>
+                    <button 
+                      onClick={() => setIsEditingName(true)}
+                      className="absolute right-6 p-2.5 rounded-full bg-white shadow-md border border-slate-50 text-emerald-700 active:scale-90 transition-all"
+                      aria-label="Editar nombre"
+                    >
+                      <Edit3 className="w-4 h-4" />
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
 
-            <div className="p-4 rounded-2xl neu-inset bg-white/50 relative group">
-              <p className="text-sm text-slate-500 font-bold uppercase tracking-wider mb-1">Saldo Inicial / Efectivo</p>
-              {isEditingBalance ? (
-                <div className="flex items-center gap-2">
-                  <Input 
-                    type="number"
-                    value={newBalance} 
-                    onChange={e => setNewBalance(e.target.value)} 
-                    className="h-9 font-mono"
-                    autoFocus
-                  />
-                  <Button 
-                    size="sm" 
-                    onClick={() => {
-                      setInitialBalance(newBalance);
-                      setIsEditingBalance(false);
-                    }}
-                  >
-                    Guardar
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    onClick={() => setIsEditingBalance(false)}
-                  >
-                    Cancelar
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex justify-between items-center">
-                  <p className="text-lg font-bold text-charcoal-900 font-mono">${Number(initialBalance).toLocaleString()}</p>
-                  <button 
-                    onClick={() => {
-                      setIsEditingBalance(true);
-                      setNewBalance(initialBalance);
-                    }}
-                    className="text-slate-400 hover:text-emerald-500 opacity-0 group-hover:opacity-100 transition-all"
-                  >
-                    <Edit3 className="w-4 h-4" />
-                  </button>
-                </div>
-              )}
-              <p className="text-[10px] text-slate-400 mt-2 italic">
-                * Este valor se utiliza como base para calcular tu patrimonio neto total.
+            {/* Saldo Inicial */}
+            <div className="space-y-3">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] ml-1">SALDO INICIAL / EFECTIVO</p>
+              <div className="p-6 rounded-[2rem] bg-slate-50/50 border border-slate-100 relative group min-h-[80px] flex items-center justify-between overflow-hidden">
+                {isEditingBalance ? (
+                  <div className="flex flex-col w-full gap-4 animate-in slide-in-from-bottom-2 duration-300">
+                    <Input 
+                      type="number"
+                      value={newBalance} 
+                      onChange={e => setNewBalance(e.target.value)} 
+                      className="h-12 rounded-2xl border-slate-200 bg-white shadow-sm font-mono focus:ring-emerald-900/5"
+                      autoFocus
+                    />
+                    <div className="flex gap-2">
+                      <Button 
+                        className="flex-1 h-11 rounded-xl bg-emerald-900 font-bold"
+                        onClick={() => {
+                          setInitialBalance(newBalance);
+                          setIsEditingBalance(false);
+                        }}
+                      >
+                        Guardar
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        className="flex-1 h-11 rounded-xl font-bold border-slate-200"
+                        onClick={() => setIsEditingBalance(false)}
+                      >
+                        Cancelar
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-xl font-bold text-emerald-900 font-mono tracking-tighter">
+                      ${Number(initialBalance).toLocaleString()}
+                    </p>
+                    <button 
+                      onClick={() => {
+                        setIsEditingBalance(true);
+                        setNewBalance(initialBalance);
+                      }}
+                      className="absolute right-6 p-2.5 rounded-full bg-white shadow-md border border-slate-50 text-emerald-700 active:scale-90 transition-all"
+                      aria-label="Editar saldo"
+                    >
+                      <Edit3 className="w-4 h-4" />
+                    </button>
+                  </>
+                )}
+              </div>
+              <p className="text-[10px] text-slate-400 mt-3 italic px-2 leading-relaxed">
+                * Este valor es la base para el cálculo de tu patrimonio neto total.
               </p>
             </div>
           </div>
