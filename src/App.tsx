@@ -71,19 +71,19 @@ export default function App() {
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <Dashboard />;
+        return <Dashboard key="dashboard" />;
       case 'transactions':
-        return <Transactions />;
+        return <Transactions key="transactions" />;
       case 'loans':
-        return <Loans />;
+        return <Loans key="loans" />;
       case 'investments':
-        return <Investments />;
+        return <Investments key="investments" />;
       case 'debts':
-        return <Debts />;
+        return <Debts key="debts" />;
       case 'settings':
-        return <Settings />;
+        return <Settings key="settings" />;
       default:
-        return <Dashboard />;
+        return <Dashboard key="dashboard" />;
     }
   };
 

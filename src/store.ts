@@ -131,7 +131,7 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
       category: tx.category,
       date: tx.date,
       notes: tx.notes
-    }).select().single();
+    }).select().maybeSingle();
     if (!error && data) set((state) => ({ transactions: [data, ...state.transactions] }));
   },
 
@@ -146,7 +146,7 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
       due_date: loan.dueDate,
       start_date: loan.startDate,
       status: loan.status
-    }).select().single();
+    }).select().maybeSingle();
     if (!error && data) set((state) => ({ loans: [data, ...state.loans] }));
   },
 
@@ -160,7 +160,7 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
       initial_investment: parseFloat(inv.initialInvestment),
       current_value: parseFloat(inv.currentValue),
       purchase_date: inv.purchaseDate
-    }).select().single();
+    }).select().maybeSingle();
     if (!error && data) set((state) => ({ investments: [data, ...state.investments] }));
   },
 
@@ -183,7 +183,7 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
       due_date: debt.dueDate,
       status: debt.status,
       notes: debt.notes
-    }).select().single();
+    }).select().maybeSingle();
     if (!error && data) set((state) => ({ debts: [data, ...state.debts] }));
   },
 
