@@ -12,6 +12,7 @@ import { supabase } from './supabase';
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const { fetchData, isLoading } = useFinanceStore();
+  const userId = useFinanceStore(state => state.userId);
 
   useEffect(() => {
     const initApp = async () => {
@@ -68,7 +69,7 @@ export default function App() {
     );
   }
 
-  if (!isLoading && !useFinanceStore.getState().userId) {
+  if (!isLoading && !userId) {
     return (
       <div className="min-h-screen bg-gold-500 flex items-center justify-center p-4">
         <div className="bg-white p-8 rounded-[2.5rem] shadow-2xl max-w-md w-full text-center border border-emerald-100">

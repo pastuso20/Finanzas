@@ -212,36 +212,36 @@ export function Transactions() {
 
       {/* Transaction List */}
       <div className="space-y-4">
-        {filteredTransactions.map(tx => (
-          <div key={tx.id} className="bg-white p-4 rounded-3xl border border-slate-50 shadow-sm flex items-center justify-between active:scale-[0.98] transition-all">
-            <div className="flex items-center gap-4">
-              <div className={cn(
-                "w-12 h-12 rounded-2xl flex items-center justify-center",
-                tx.type === 'income' ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-500"
-              )}>
-                {tx.type === 'income' ? <ArrowUpRight className="w-6 h-6" /> : <ArrowDownRight className="w-6 h-6" />}
+        {filteredTransactions.length > 0 ? (
+          filteredTransactions.map(tx => (
+            <div key={tx.id} className="bg-white p-4 rounded-3xl border border-slate-50 shadow-sm flex items-center justify-between active:scale-[0.98] transition-all">
+              <div className="flex items-center gap-4">
+                <div className={cn(
+                  "w-12 h-12 rounded-2xl flex items-center justify-center",
+                  tx.type === 'income' ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-500"
+                )}>
+                  {tx.type === 'income' ? <ArrowUpRight className="w-6 h-6" /> : <ArrowDownRight className="w-6 h-6" />}
+                </div>
+                <div>
+                  <p className="font-bold text-emerald-900 text-base">{tx.category}</p>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">
+                    {format(new Date(tx.date), "dd 'de' MMM, yyyy", { locale: es })}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="font-bold text-emerald-900 text-base">{tx.category}</p>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">
-                  {format(new Date(tx.date), "dd 'de' MMM, yyyy", { locale: es })}
+              <div className="text-right">
+                <p className={cn(
+                  "font-mono font-bold text-lg",
+                  tx.type === 'income' ? "text-emerald-700" : "text-rose-600"
+                )}>
+                  {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
                 </p>
+                {tx.notes && <p className="text-[9px] text-slate-400 mt-0.5 italic max-w-[100px] truncate">{tx.notes}</p>}
               </div>
             </div>
-            <div className="text-right">
-              <p className={cn(
-                "font-mono font-bold text-lg",
-                tx.type === 'income' ? "text-emerald-700" : "text-rose-600"
-              )}>
-                {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
-              </p>
-              {tx.notes && <p className="text-[9px] text-slate-400 mt-0.5 italic max-w-[100px] truncate">{tx.notes}</p>}
-            </div>
-          </div>
-        ))}
-
-        {filteredTransactions.length === 0 && (
-          <div className="py-20 flex flex-col items-center justify-center text-center animate-in fade-in zoom-in duration-500">
+          ))
+        ) : (
+          <div key="empty-state" className="py-20 flex flex-col items-center justify-center text-center animate-in fade-in zoom-in duration-500">
             <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-6">
               <Wallet className="w-10 h-10 text-slate-200" />
             </div>

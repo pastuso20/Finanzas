@@ -12,21 +12,27 @@ export function Loans() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [newLoan, setNewLoan] = useState({ borrower: '', principal: '', interestRate: '', startDate: new Date().toISOString().split('T')[0], dueDate: '' });
 
-  const handleAdd = (e: React.FormEvent) => {
+  const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newLoan.borrower || !newLoan.principal || !newLoan.dueDate) return;
 
-    addLoan({
-      borrower: newLoan.borrower,
-      principal: newLoan.principal,
-      interestRate: newLoan.interestRate || '0',
-      startDate: new Date(newLoan.startDate).toISOString(),
-      dueDate: new Date(newLoan.dueDate).toISOString(),
-      status: 'active'
-    });
+    try {
+      await addLoan({
+        borrower: newLoan.borrower,
+        principal: newLoan.principal,
+        interestRate: newLoan.interestRate || '0',
+        startDate: new Date(newLoan.startDate).toISOString(),
+        dueDate: new Date(newLoan.dueDate).toISOString(),
+        status: 'active'
+      });
 
-    setNewLoan({ borrower: '', principal: '', interestRate: '', startDate: new Date().toISOString().split('T')[0], dueDate: '' });
-    setShowAddForm(false);
+      setNewLoan({ borrower: '', principal: '', interestRate: '', startDate: new Date().toISOString().split('T')[0], dueDate: '' });
+      setTimeout(() => {
+        setShowAddForm(false);
+      }, 0);
+    } catch (error) {
+      console.error('Error adding loan:', error);
+    }
   };
 
   const activeLoans = loans.filter(l => l.status === 'active');
@@ -123,82 +129,82 @@ export function Loans() {
 
       {/* Loan List */}
       <div className="space-y-4">
-        {loans.map(loan => {
-          const principal = new Decimal(loan.principal);
-          const rate = new Decimal(loan.interestRate || 0);
-          const daysElapsed = differenceInDays(new Date(), new Date(loan.startDate));
-          const daysTotal = differenceInDays(new Date(loan.dueDate), new Date(loan.startDate));
+        {loans.length > 0 ? (
+          loans.map(loan => {
+            const principal = new Decimal(loan.principal);
+            const rate = new Decimal(loan.interestRate || 0);
+            const daysElapsed = differenceInDays(new Date(), new Date(loan.startDate));
+            const daysTotal = differenceInDays(new Date(loan.dueDate), new Date(loan.startDate));
 
-          const interestAccrued = principal.times(rate.dividedBy(100)).times(new Decimal(daysElapsed).dividedBy(365));
-          const totalDue = principal.plus(interestAccrued);
+            const interestAccrued = principal.times(rate.dividedBy(100)).times(new Decimal(daysElapsed).dividedBy(365));
+            const totalDue = principal.plus(interestAccrued);
 
-          const isOverdue = new Date() > new Date(loan.dueDate) && loan.status === 'active';
-          const progress = Math.min(Math.max((daysElapsed / daysTotal) * 100, 0), 100);
+            const isOverdue = new Date() > new Date(loan.dueDate) && loan.status === 'active';
+            const progress = Math.min(Math.max((daysElapsed / daysTotal) * 100, 0), 100);
 
-          return (
-            <Card key={loan.id} className="p-6 relative overflow-hidden group">
-              {/* Progress bar background */}
-              <div
-                className={cn(
-                  "absolute bottom-0 left-0 h-1.5 transition-all duration-500",
-                  isOverdue ? "bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]" : "bg-emerald-500 shadow-[0_0_10px_rgba(0,79,57,0.5)]"
-                )}
-                style={{ width: `${progress}%` }}
-              />
+            return (
+              <Card key={loan.id} className="p-6 relative overflow-hidden group">
+                {/* Progress bar background */}
+                <div
+                  className={cn(
+                    "absolute bottom-0 left-0 h-1.5 transition-all duration-500",
+                    isOverdue ? "bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]" : "bg-emerald-500 shadow-[0_0_10px_rgba(0,79,57,0.5)]"
+                  )}
+                  style={{ width: `${progress}%` }}
+                />
 
-              <div className="flex flex-col xl:flex-row justify-between gap-6">
-                <div className="flex items-start gap-4 xl:w-1/3">
-                  <div className={cn(
-                    "w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center shrink-0 neu-inset",
-                    isOverdue ? "text-rose-500" : "text-emerald-500"
-                  )}>
-                    <Users className="w-7 h-7 drop-shadow-sm" />
-                  </div>
-                  <div>
-                    <h4 className="text-lg font-bold text-charcoal-900 drop-shadow-sm">{loan.borrower}</h4>
-                    <div className="flex items-center gap-2 text-sm text-slate-500 font-bold uppercase tracking-wider mt-1">
-                      <Calendar className="w-4 h-4" />
-                      <span>Vence {format(new Date(loan.dueDate), "dd 'de' MMM, yyyy", { locale: es })}</span>
+                <div className="flex flex-col xl:flex-row justify-between gap-6">
+                  <div className="flex items-start gap-4 xl:w-1/3">
+                    <div className={cn(
+                      "w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center shrink-0 neu-inset",
+                      isOverdue ? "text-rose-500" : "text-emerald-500"
+                    )}>
+                      <Users className="w-7 h-7 drop-shadow-sm" />
                     </div>
-                    {isOverdue && (
-                      <div className="flex items-center gap-1 text-xs text-rose-500 mt-2 font-bold neu-inset px-3 py-1.5 rounded-xl w-fit">
-                        <AlertCircle className="w-3 h-3" />
-                        VENCIDO
+                    <div>
+                      <h4 className="text-lg font-bold text-charcoal-900 drop-shadow-sm">{loan.borrower}</h4>
+                      <div className="flex items-center gap-2 text-sm text-slate-500 font-bold uppercase tracking-wider mt-1">
+                        <Calendar className="w-4 h-4" />
+                        <span>Vence {format(new Date(loan.dueDate), "dd 'de' MMM, yyyy", { locale: es })}</span>
                       </div>
-                    )}
+                      {isOverdue && (
+                        <div className="flex items-center gap-1 text-xs text-rose-500 mt-2 font-bold neu-inset px-3 py-1.5 rounded-xl w-fit">
+                          <AlertCircle className="w-3 h-3" />
+                          VENCIDO
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row flex-1 justify-between items-stretch sm:items-center neu-inset rounded-2xl p-4 md:p-5 gap-4 sm:gap-0">
+                    <div className="text-left sm:text-center px-2 flex sm:flex-col justify-between items-center sm:items-stretch">
+                      <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-0 sm:mb-1">Principal</p>
+                      <p className="font-mono font-bold text-charcoal-900 drop-shadow-sm">{formatCurrency(principal)}</p>
+                    </div>
+
+                    <div className="text-left sm:text-center px-2 flex sm:flex-col justify-between items-center sm:items-stretch border-y sm:border-y-0 sm:border-x border-white/20 py-2 sm:py-0">
+                      <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-0 sm:mb-1">Interés ({rate.toNumber()}%)</p>
+                      <p className="font-mono font-bold text-emerald-600 drop-shadow-sm">+{formatCurrency(interestAccrued)}</p>
+                    </div>
+
+                    <div className="text-left sm:text-right px-2 flex sm:flex-col justify-between items-center sm:items-stretch">
+                      <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-0 sm:mb-1">Total a Pagar</p>
+                      <p className="font-mono text-lg md:text-xl font-bold text-charcoal-900 drop-shadow-sm">{formatCurrency(totalDue)}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-end xl:w-36">
+                    <Button variant="outline" className="w-full text-xs font-bold gap-2">
+                      <CheckCircle2 className="w-4 h-4" />
+                      Marcar Pagado
+                    </Button>
                   </div>
                 </div>
-
-                <div className="flex flex-col sm:flex-row flex-1 justify-between items-stretch sm:items-center neu-inset rounded-2xl p-4 md:p-5 gap-4 sm:gap-0">
-                  <div className="text-left sm:text-center px-2 flex sm:flex-col justify-between items-center sm:items-stretch">
-                    <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-0 sm:mb-1">Principal</p>
-                    <p className="font-mono font-bold text-charcoal-900 drop-shadow-sm">{formatCurrency(principal)}</p>
-                  </div>
-
-                  <div className="text-left sm:text-center px-2 flex sm:flex-col justify-between items-center sm:items-stretch border-y sm:border-y-0 sm:border-x border-white/20 py-2 sm:py-0">
-                    <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-0 sm:mb-1">Interés ({rate.toNumber()}%)</p>
-                    <p className="font-mono font-bold text-emerald-600 drop-shadow-sm">+{formatCurrency(interestAccrued)}</p>
-                  </div>
-
-                  <div className="text-left sm:text-right px-2 flex sm:flex-col justify-between items-center sm:items-stretch">
-                    <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-0 sm:mb-1">Total a Pagar</p>
-                    <p className="font-mono text-lg md:text-xl font-bold text-charcoal-900 drop-shadow-sm">{formatCurrency(totalDue)}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-end xl:w-36">
-                  <Button variant="outline" className="w-full text-xs font-bold gap-2">
-                    <CheckCircle2 className="w-4 h-4" />
-                    Marcar Pagado
-                  </Button>
-                </div>
-              </div>
-            </Card>
-          );
-        })}
-
-        {loans.length === 0 && (
-          <div className="text-center py-12 rounded-3xl neu-inset">
+              </Card>
+            );
+          })
+        ) : (
+          <div key="empty-loans" className="text-center py-12 rounded-3xl neu-inset">
             <Users className="w-12 h-12 text-slate-400 mx-auto mb-4" />
             <p className="text-slate-500 font-bold uppercase tracking-wider text-sm">No hay préstamos activos.</p>
           </div>

@@ -12,20 +12,26 @@ export function Debts() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [newDebt, setNewDebt] = useState({ creditor: '', amount: '', dueDate: '', notes: '' });
 
-  const handleAdd = (e: React.FormEvent) => {
+  const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newDebt.creditor || !newDebt.amount || !newDebt.dueDate) return;
 
-    addDebt({
-      creditor: newDebt.creditor,
-      amount: newDebt.amount,
-      dueDate: new Date(newDebt.dueDate).toISOString(),
-      status: 'pending',
-      notes: newDebt.notes
-    });
+    try {
+      await addDebt({
+        creditor: newDebt.creditor,
+        amount: newDebt.amount,
+        dueDate: new Date(newDebt.dueDate).toISOString(),
+        status: 'pending',
+        notes: newDebt.notes
+      });
 
-    setNewDebt({ creditor: '', amount: '', dueDate: '', notes: '' });
-    setShowAddForm(false);
+      setNewDebt({ creditor: '', amount: '', dueDate: '', notes: '' });
+      setTimeout(() => {
+        setShowAddForm(false);
+      }, 0);
+    } catch (error) {
+      console.error('Error adding debt:', error);
+    }
   };
 
   const pendingDebts = debts.filter(d => d.status === 'pending');
