@@ -8,7 +8,8 @@ import { es } from 'date-fns/locale';
 import { formatCurrency } from '../utils';
 
 export function Transactions() {
-  const { transactions, addTransaction } = useFinanceStore();
+  const transactions = useFinanceStore(state => state.transactions);
+  const addTransaction = useFinanceStore(state => state.addTransaction);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newTx, setNewTx] = useState({ type: 'expense' as 'income' | 'expense', amount: '', category: '', date: new Date().toISOString().split('T')[0], notes: '' });
   const [filter, setFilter] = useState('all');
@@ -27,11 +28,9 @@ export function Transactions() {
         notes: newTx.notes
       });
 
-      // Clear form and close it in the next tick to ensure state is updated
+      // Reset local state and close form
       setNewTx({ type: 'expense', amount: '', category: '', date: new Date().toISOString().split('T')[0], notes: '' });
-      setTimeout(() => {
-        setShowAddForm(false);
-      }, 0);
+      setShowAddForm(false);
     } catch (error) {
       console.error('Error handling add transaction:', error);
     }

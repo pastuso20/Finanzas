@@ -8,7 +8,9 @@ import { es } from 'date-fns/locale';
 import { formatCurrency } from '../utils';
 
 export function Debts() {
-  const { debts, addDebt, toggleDebtStatus } = useFinanceStore();
+  const debts = useFinanceStore(state => state.debts);
+  const addDebt = useFinanceStore(state => state.addDebt);
+  const toggleDebtStatus = useFinanceStore(state => state.toggleDebtStatus);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newDebt, setNewDebt] = useState({ creditor: '', amount: '', dueDate: '', notes: '' });
 
@@ -25,10 +27,9 @@ export function Debts() {
         notes: newDebt.notes
       });
 
+      // Reset local state and close form
       setNewDebt({ creditor: '', amount: '', dueDate: '', notes: '' });
-      setTimeout(() => {
-        setShowAddForm(false);
-      }, 0);
+      setShowAddForm(false);
     } catch (error) {
       console.error('Error adding debt:', error);
     }

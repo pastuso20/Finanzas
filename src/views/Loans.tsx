@@ -8,7 +8,8 @@ import { es } from 'date-fns/locale';
 import { formatCurrency } from '../utils';
 
 export function Loans() {
-  const { loans, addLoan } = useFinanceStore();
+  const loans = useFinanceStore(state => state.loans);
+  const addLoan = useFinanceStore(state => state.addLoan);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newLoan, setNewLoan] = useState({ borrower: '', principal: '', interestRate: '', startDate: new Date().toISOString().split('T')[0], dueDate: '' });
 
@@ -26,10 +27,9 @@ export function Loans() {
         status: 'active'
       });
 
+      // Reset local state and close form
       setNewLoan({ borrower: '', principal: '', interestRate: '', startDate: new Date().toISOString().split('T')[0], dueDate: '' });
-      setTimeout(() => {
-        setShowAddForm(false);
-      }, 0);
+      setShowAddForm(false);
     } catch (error) {
       console.error('Error adding loan:', error);
     }

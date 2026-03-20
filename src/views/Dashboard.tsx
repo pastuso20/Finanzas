@@ -20,7 +20,11 @@ const mockNetWorthData = [
 ];
 
 export function Dashboard() {
-  const { transactions, loans, investments, debts, initialBalance } = useFinanceStore();
+  const transactions = useFinanceStore(state => state.transactions);
+  const loans = useFinanceStore(state => state.loans);
+  const investments = useFinanceStore(state => state.investments);
+  const debts = useFinanceStore(state => state.debts);
+  const initialBalance = useFinanceStore(state => state.initialBalance);
 
   const totalInvestments = investments.reduce((acc, inv) => acc.plus(new Decimal(inv.currentValue)), new Decimal(0));
   const totalLoans = loans.filter(l => l.status === 'active').reduce((acc, loan) => acc.plus(new Decimal(loan.principal)), new Decimal(0));

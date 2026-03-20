@@ -11,7 +11,7 @@ interface LayoutProps {
 
 export function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const { userName } = useFinanceStore();
+  const userName = useFinanceStore(state => state.userName);
 
   const navItems = [
     { id: 'dashboard', label: 'Panel Principal', icon: LayoutDashboard },
@@ -22,7 +22,7 @@ export function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-[#f9fafb] text-charcoal-900 flex flex-col md:flex-row overflow-hidden">
+    <div className="min-h-screen bg-[#f9fafb] text-charcoal-900 flex flex-col md:flex-row overflow-hidden" translate="no">
 
       {/* Mobile Header (Refined UI/UX) */}
       <div className="md:hidden flex items-center justify-between p-6 z-30 relative shrink-0 bg-white/50 backdrop-blur-md">
@@ -30,13 +30,13 @@ export function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
           <div className="avatar-gold-border">
             <img
               src="/logo.png"
-              alt={userName}
+              alt={userName || 'User'}
               className="w-12 h-12 object-cover"
             />
           </div>
           <div className="flex flex-col">
-            <h1 className="font-bold text-emerald-900 text-lg tracking-tight leading-none">{userName}</h1>
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Finance</p>
+            <h1 className="font-bold text-emerald-900 text-lg tracking-tight leading-none"><span>{userName}</span></h1>
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1"><span>Finance</span></p>
           </div>
         </div>
         <div className="flex gap-3">
@@ -71,7 +71,7 @@ export function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
               <div className="videogame-coin-wrap shrink-0">
                 <img
                   src="/logo.png"
-                  alt="David Aite"
+                  alt="Logo"
                   className={cn(
                     "object-contain videogame-coin",
                     isCollapsed ? "w-12 h-12" : "w-16 h-16"
@@ -84,9 +84,9 @@ export function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
                 isCollapsed ? "max-w-0 opacity-0 scale-x-0" : "max-w-[200px] opacity-100 scale-x-100"
               )}>
                 <h1 className="font-bold text-emerald-500 text-xl tracking-tight leading-none pt-1">
-                  {userName}
+                  <span>{userName}</span>
                 </h1>
-                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Finance</p>
+                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5"><span>Finance</span></p>
               </div>
             </div>
 
@@ -117,7 +117,7 @@ export function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
                       "transition-all duration-500 whitespace-nowrap overflow-hidden flex-1 text-left line-clamp-1",
                       isCollapsed ? "max-w-0 opacity-0 ml-0" : "max-w-[200px] opacity-100 ml-3"
                     )}>
-                      {item.label}
+                      <span>{item.label}</span>
                     </span>
                   </button>
                 );
@@ -146,7 +146,7 @@ export function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
                 "transition-all duration-500 whitespace-nowrap overflow-hidden flex-1 text-left",
                 isCollapsed ? "max-w-0 opacity-0 ml-0" : "max-w-[200px] opacity-100 ml-3"
               )}>
-                Configuración
+                <span>Configuración</span>
               </span>
             </button>
             <button
@@ -161,7 +161,7 @@ export function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
                 "transition-all duration-500 whitespace-nowrap overflow-hidden flex-1 text-left",
                 isCollapsed ? "max-w-0 opacity-0 ml-0" : "max-w-[200px] opacity-100 ml-3"
               )}>
-                Cerrar Sesión
+                <span>Cerrar Sesión</span>
               </span>
             </button>
           </div>
@@ -175,7 +175,7 @@ export function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
         <div className="absolute bottom-[20%] right-[0%] md:right-[10%] w-[50%] md:w-[40%] h-[50%] md:h-[40%] rounded-full bg-emerald-500/10 blur-[100px] pointer-events-none" />
 
         <div className="glass-card-mobile-transparent glass-card md:h-full rounded-none md:rounded-[2.5rem] px-4 py-2 md:p-8 relative z-10 overflow-y-visible md:overflow-y-auto min-h-[calc(100vh-8rem)] md:min-h-0">
-          <div className="max-w-6xl mx-auto pb-6 md:pb-10">
+          <div className="max-w-6xl mx-auto pb-6 md:pb-10 notranslate">
             {children}
           </div>
         </div>
@@ -201,7 +201,7 @@ export function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
                 {isActive && (
                   <>
                     <span className="text-[10px] font-bold mt-1 tracking-wider uppercase">
-                      {item.label.split(' ')[0]}
+                      <span>{item.label.split(' ')[0]}</span>
                     </span>
                     <div className="bottom-nav-indicator" />
                   </>

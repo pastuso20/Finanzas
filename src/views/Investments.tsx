@@ -8,7 +8,9 @@ import { es } from 'date-fns/locale';
 import { formatCurrency } from '../utils';
 
 export function Investments() {
-  const { investments, addInvestment, updateInvestmentValue } = useFinanceStore();
+  const investments = useFinanceStore(state => state.investments);
+  const addInvestment = useFinanceStore(state => state.addInvestment);
+  const updateInvestmentValue = useFinanceStore(state => state.updateInvestmentValue);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newInv, setNewInv] = useState({ assetName: '', description: '', initialInvestment: '', currentValue: '', purchaseDate: new Date().toISOString().split('T')[0] });
 
@@ -25,10 +27,9 @@ export function Investments() {
         purchaseDate: new Date(newInv.purchaseDate).toISOString()
       });
 
+      // Reset local state and close form
       setNewInv({ assetName: '', description: '', initialInvestment: '', currentValue: '', purchaseDate: new Date().toISOString().split('T')[0] });
-      setTimeout(() => {
-        setShowAddForm(false);
-      }, 0);
+      setShowAddForm(false);
     } catch (error) {
       console.error('Error adding investment:', error);
     }
