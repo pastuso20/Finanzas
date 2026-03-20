@@ -39,11 +39,11 @@ export function Loans() {
   const totalLent = activeLoans.reduce((acc, l) => acc.plus(new Decimal(l.principal)), new Decimal(0));
 
   return (
-    <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500 pb-20 md:pb-0">
+    <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500 pb-20 md:pb-0" translate="no">
       <header className="flex flex-col md:flex-row md:justify-between md:items-end gap-6">
         <div className="flex flex-col">
-          <h2 className="text-4xl md:text-5xl font-bold text-emerald-900 tracking-tight font-serif">Préstamos</h2>
-          <p className="text-slate-400 text-sm md:text-base mt-2">Sigue el dinero prestado a terceros</p>
+          <h2 className="text-4xl md:text-5xl font-bold text-emerald-900 tracking-tight font-serif"><span>Préstamos</span></h2>
+          <p className="text-slate-400 text-sm md:text-base mt-2"><span>Sigue el dinero prestado a terceros</span></p>
         </div>
         
         {/* New Loan Button - Mobile Highlighted */}
@@ -58,23 +58,23 @@ export function Loans() {
         {/* Desktop New Loan Button */}
         <Button onClick={() => setShowAddForm(!showAddForm)} className="hidden md:flex gap-2 rounded-2xl px-8 h-12">
           {showAddForm ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-          {showAddForm ? 'Cancelar' : 'Nuevo Préstamo'}
+          <span>{showAddForm ? 'Cancelar' : 'Nuevo Préstamo'}</span>
         </Button>
       </header>
 
       {/* Summary Cards - Mobile Expert UI */}
       <div className="md:hidden pt-2">
-        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4 ml-1">RESUMEN DE PRÉSTAMOS</p>
+        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4 ml-1"><span>RESUMEN DE PRÉSTAMOS</span></p>
         <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden divide-y divide-slate-50">
           <div className="p-6 flex justify-between items-center">
-            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">TOTAL PRESTADO</p>
-            <p className="text-xl font-bold text-emerald-900 font-mono tracking-tighter">{formatCurrency(totalLent)}</p>
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest"><span>TOTAL PRESTADO</span></p>
+            <p className="text-xl font-bold text-emerald-900 font-mono tracking-tighter"><span>{formatCurrency(totalLent)}</span></p>
           </div>
           <div className="p-6 flex justify-between items-center bg-slate-50/30">
-            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">PRESTATARIOS</p>
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest"><span>PRESTATARIOS</span></p>
             <div className="flex items-center gap-2">
               <Users className="w-4 h-4 text-emerald-700" />
-              <p className="text-lg font-bold text-emerald-900 font-mono tracking-tighter">{activeLoans.length} Activos</p>
+              <p className="text-lg font-bold text-emerald-900 font-mono tracking-tighter"><span>{activeLoans.length} Activos</span></p>
             </div>
           </div>
         </div>
@@ -87,8 +87,8 @@ export function Loans() {
             <DollarSign className="w-7 h-7 text-emerald-700" />
           </div>
           <div>
-            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Total Préstamos Activos</p>
-            <p className="text-3xl font-bold text-emerald-900 font-mono">{formatCurrency(totalLent)}</p>
+            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest"><span>Total Préstamos Activos</span></p>
+            <p className="text-3xl font-bold text-emerald-900 font-mono"><span>{formatCurrency(totalLent)}</span></p>
           </div>
         </Card>
 
@@ -97,8 +97,8 @@ export function Loans() {
             <Users className="w-7 h-7 text-emerald-700" />
           </div>
           <div>
-            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Prestatarios Activos</p>
-            <p className="text-3xl font-bold text-emerald-900 font-mono">{activeLoans.length}</p>
+            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest"><span>Prestatarios Activos</span></p>
+            <p className="text-3xl font-bold text-emerald-900 font-mono"><span>{activeLoans.length}</span></p>
           </div>
         </Card>
       </div>
@@ -107,28 +107,28 @@ export function Loans() {
         <Card className="mb-6 border-emerald-500/30">
           <form onSubmit={handleAdd} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
             <div className="space-y-2">
-              <Label htmlFor="borrower">Nombre del Prestatario</Label>
+              <Label htmlFor="borrower"><span>Nombre del Prestatario</span></Label>
               <Input id="borrower" value={newLoan.borrower} onChange={e => setNewLoan({ ...newLoan, borrower: e.target.value })} placeholder="Ej. Juan Pérez" required />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="principal">Monto Principal ($)</Label>
+              <Label htmlFor="principal"><span>Monto Principal ($)</span></Label>
               <Input id="principal" type="number" step="1" value={newLoan.principal} onChange={e => setNewLoan({ ...newLoan, principal: e.target.value })} placeholder="0" required />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="interestRate">Tasa de Interés (%)</Label>
+              <Label htmlFor="interestRate"><span>Tasa de Interés (%)</span></Label>
               <Input id="interestRate" type="number" step="0.1" value={newLoan.interestRate} onChange={e => setNewLoan({ ...newLoan, interestRate: e.target.value })} placeholder="0.0" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="dueDate">Fecha de Vencimiento</Label>
+              <Label htmlFor="dueDate"><span>Fecha de Vencimiento</span></Label>
               <Input id="dueDate" type="date" value={newLoan.dueDate} onChange={e => setNewLoan({ ...newLoan, dueDate: e.target.value })} required />
             </div>
-            <Button type="submit" className="w-full">Agregar Préstamo</Button>
+            <Button type="submit" className="w-full"><span>Agregar Préstamo</span></Button>
           </form>
         </Card>
       )}
 
       {/* Loan List */}
-      <div className="space-y-4">
+      <div className="space-y-4 notranslate">
         {loans.length > 0 ? (
           loans.map(loan => {
             const principal = new Decimal(loan.principal);
@@ -162,7 +162,7 @@ export function Loans() {
                       <Users className="w-7 h-7 drop-shadow-sm" />
                     </div>
                     <div>
-                      <h4 className="text-lg font-bold text-charcoal-900 drop-shadow-sm">{loan.borrower}</h4>
+                      <h4 className="text-lg font-bold text-charcoal-900 drop-shadow-sm"><span>{loan.borrower}</span></h4>
                       <div className="flex items-center gap-2 text-sm text-slate-500 font-bold uppercase tracking-wider mt-1">
                         <Calendar className="w-4 h-4" />
                         <span>Vence {format(new Date(loan.dueDate), "dd 'de' MMM, yyyy", { locale: es })}</span>
@@ -170,7 +170,7 @@ export function Loans() {
                       {isOverdue && (
                         <div className="flex items-center gap-1 text-xs text-rose-500 mt-2 font-bold neu-inset px-3 py-1.5 rounded-xl w-fit">
                           <AlertCircle className="w-3 h-3" />
-                          VENCIDO
+                          <span>VENCIDO</span>
                         </div>
                       )}
                     </div>
@@ -178,25 +178,25 @@ export function Loans() {
 
                   <div className="flex flex-col sm:flex-row flex-1 justify-between items-stretch sm:items-center neu-inset rounded-2xl p-4 md:p-5 gap-4 sm:gap-0">
                     <div className="text-left sm:text-center px-2 flex sm:flex-col justify-between items-center sm:items-stretch">
-                      <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-0 sm:mb-1">Principal</p>
-                      <p className="font-mono font-bold text-charcoal-900 drop-shadow-sm">{formatCurrency(principal)}</p>
+                      <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-0 sm:mb-1"><span>Principal</span></p>
+                      <p className="font-mono font-bold text-charcoal-900 drop-shadow-sm"><span>{formatCurrency(principal)}</span></p>
                     </div>
 
                     <div className="text-left sm:text-center px-2 flex sm:flex-col justify-between items-center sm:items-stretch border-y sm:border-y-0 sm:border-x border-white/20 py-2 sm:py-0">
-                      <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-0 sm:mb-1">Interés ({rate.toNumber()}%)</p>
-                      <p className="font-mono font-bold text-emerald-600 drop-shadow-sm">+{formatCurrency(interestAccrued)}</p>
+                      <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-0 sm:mb-1"><span>Interés ({rate.toNumber()}%)</span></p>
+                      <p className="font-mono font-bold text-emerald-600 drop-shadow-sm"><span>+{formatCurrency(interestAccrued)}</span></p>
                     </div>
 
                     <div className="text-left sm:text-right px-2 flex sm:flex-col justify-between items-center sm:items-stretch">
-                      <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-0 sm:mb-1">Total a Pagar</p>
-                      <p className="font-mono text-lg md:text-xl font-bold text-charcoal-900 drop-shadow-sm">{formatCurrency(totalDue)}</p>
+                      <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-0 sm:mb-1"><span>Total a Pagar</span></p>
+                      <p className="font-mono text-lg md:text-xl font-bold text-charcoal-900 drop-shadow-sm"><span>{formatCurrency(totalDue)}</span></p>
                     </div>
                   </div>
 
                   <div className="flex items-center justify-end xl:w-36">
                     <Button variant="outline" className="w-full text-xs font-bold gap-2">
                       <CheckCircle2 className="w-4 h-4" />
-                      Marcar Pagado
+                      <span>Marcar Pagado</span>
                     </Button>
                   </div>
                 </div>
@@ -206,7 +206,7 @@ export function Loans() {
         ) : (
           <div key="empty-loans" className="text-center py-12 rounded-3xl neu-inset">
             <Users className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-            <p className="text-slate-500 font-bold uppercase tracking-wider text-sm">No hay préstamos activos.</p>
+            <p className="text-slate-500 font-bold uppercase tracking-wider text-sm"><span>No hay préstamos activos.</span></p>
           </div>
         )}
       </div>

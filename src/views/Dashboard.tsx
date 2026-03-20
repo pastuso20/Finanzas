@@ -40,21 +40,21 @@ export function Dashboard() {
   );
 
   return (
-    <div className="space-y-6 md:space-y-10 animate-in fade-in duration-500 pb-20 md:pb-0">
+    <div className="space-y-6 md:space-y-10 animate-in fade-in duration-500 pb-20 md:pb-0" translate="no">
       {/* Refined Header - Expert UI */}
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 md:gap-0">
         <div className="flex flex-col">
-          <h2 className="text-4xl md:text-5xl font-bold text-emerald-900 tracking-tight font-serif">Resumen General</h2>
-          <p className="text-slate-400 text-sm md:text-base mt-2">Tu centro de comando financiero</p>
+          <h2 className="text-4xl md:text-5xl font-bold text-emerald-900 tracking-tight font-serif"><span>Resumen General</span></h2>
+          <p className="text-slate-400 text-sm md:text-base mt-2"><span>Tu centro de comando financiero</span></p>
         </div>
         
         {/* Patrimonio Neto - Mobile Premium UI */}
-        <div className="w-full md:w-auto bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-emerald-900/5 p-8 md:p-10 flex flex-col md:items-end relative overflow-hidden group">
+        <div className="w-full md:w-auto bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-emerald-900/5 p-8 md:p-10 flex flex-col md:items-end relative overflow-hidden group notranslate">
           <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50/50 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110" />
-          <p className="text-[10px] md:text-xs text-slate-400 font-bold uppercase tracking-[0.3em] mb-2 relative">PATRIMONIO NETO TOTAL</p>
+          <p className="text-[10px] md:text-xs text-slate-400 font-bold uppercase tracking-[0.3em] mb-2 relative"><span>PATRIMONIO NETO TOTAL</span></p>
           <div className="flex flex-col md:items-end relative">
             <h3 className="text-4xl md:text-5xl font-bold text-emerald-900 font-mono tracking-tighter">
-              {formatCurrency(netWorth)}
+              <span>{formatCurrency(netWorth)}</span>
             </h3>
             <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50 px-4 py-1.5 rounded-full text-[10px] md:text-xs mt-4 w-fit font-bold border border-emerald-100/50">
               <TrendingUp className="w-3.5 h-3.5" />
@@ -65,14 +65,14 @@ export function Dashboard() {
       </header>
 
       {/* Metric Cards - Optimized for Mobile Expert UI */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-8 notranslate">
         <Card className="flex items-center gap-5 p-6 md:p-8 border-none shadow-sm bg-white hover:shadow-md transition-shadow">
           <div className="w-14 h-14 md:w-16 md:h-16 rounded-[1.5rem] bg-slate-50 flex items-center justify-center shrink-0">
             <DollarSign className="w-7 h-7 md:w-8 md:h-8 text-emerald-700" />
           </div>
           <div className="flex flex-col gap-1">
-            <p className="text-[10px] md:text-xs text-slate-400 font-bold uppercase tracking-widest">ACTIVOS LÍQUIDOS</p>
-            <p className="text-2xl md:text-3xl font-bold text-emerald-900 font-mono tracking-tighter">{formatCurrency(cashBalance)}</p>
+            <p className="text-[10px] md:text-xs text-slate-400 font-bold uppercase tracking-widest"><span>ACTIVOS LÍQUIDOS</span></p>
+            <p className="text-2xl md:text-3xl font-bold text-emerald-900 font-mono tracking-tighter"><span>{formatCurrency(cashBalance)}</span></p>
           </div>
         </Card>
 
@@ -81,8 +81,8 @@ export function Dashboard() {
             <Activity className="w-7 h-7 md:w-8 md:h-8 text-emerald-700" />
           </div>
           <div className="flex flex-col gap-1">
-            <p className="text-[10px] md:text-xs text-slate-400 font-bold uppercase tracking-widest">INVERSIONES</p>
-            <p className="text-2xl md:text-3xl font-bold text-emerald-900 font-mono tracking-tighter">{formatCurrency(totalInvestments)}</p>
+            <p className="text-[10px] md:text-xs text-slate-400 font-bold uppercase tracking-widest"><span>INVERSIONES</span></p>
+            <p className="text-2xl md:text-3xl font-bold text-emerald-900 font-mono tracking-tighter"><span>{formatCurrency(totalInvestments)}</span></p>
           </div>
         </Card>
 
@@ -91,8 +91,8 @@ export function Dashboard() {
             <AlertCircle className="w-7 h-7 md:w-8 md:h-8 text-rose-500" />
           </div>
           <div className="flex flex-col gap-1">
-            <p className="text-[10px] md:text-xs text-slate-400 font-bold uppercase tracking-widest">DEUDAS TOTALES</p>
-            <p className="text-2xl md:text-3xl font-bold text-rose-600 font-mono tracking-tighter">{formatCurrency(totalDebts)}</p>
+            <p className="text-[10px] md:text-xs text-slate-400 font-bold uppercase tracking-widest"><span>DEUDAS TOTALES</span></p>
+            <p className="text-2xl md:text-3xl font-bold text-rose-600 font-mono tracking-tighter"><span>{formatCurrency(totalDebts)}</span></p>
           </div>
         </Card>
       </div>
@@ -101,8 +101,8 @@ export function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <Card className="lg:col-span-2 h-[400px] flex flex-col">
           <div className="mb-6">
-            <h3 className="text-lg font-bold text-emerald-500">Evolución del Patrimonio</h3>
-            <p className="text-sm text-slate-500 font-medium">Rendimiento en los últimos 7 meses</p>
+            <h3 className="text-lg font-bold text-emerald-500"><span>Evolución del Patrimonio</span></h3>
+            <p className="text-sm text-slate-500 font-medium"><span>Rendimiento en los últimos 7 meses</span></p>
           </div>
           <div className="flex-1 w-full min-h-[300px] relative">
             <ResponsiveContainer width="100%" height="100%" minWidth={0}>
@@ -156,53 +156,59 @@ export function Dashboard() {
               <div className="p-2 neu-inset rounded-xl">
                 <AlertCircle className="w-5 h-5 text-emerald-500" />
               </div>
-              <h3 className="text-lg font-bold text-emerald-500 drop-shadow-sm">Alertas de Préstamos</h3>
+              <h3 className="text-lg font-bold text-emerald-500 drop-shadow-sm"><span>Alertas de Préstamos</span></h3>
             </div>
 
-            {expiringLoans.length > 0 ? (
-              <div className="space-y-4">
-                {expiringLoans.map(loan => (
-                  <div key={loan.id} className="p-4 rounded-2xl neu-inset">
-                    <div className="flex justify-between items-start mb-1">
-                      <p className="font-bold text-charcoal-900 drop-shadow-sm">{loan.borrower}</p>
-                      <p className="text-rose-500 font-mono text-sm font-bold">{formatCurrency(loan.principal)}</p>
+            <div className="notranslate">
+              {expiringLoans.length > 0 ? (
+                <div className="space-y-4">
+                  {expiringLoans.map(loan => (
+                    <div key={loan.id} className="p-4 rounded-2xl neu-inset">
+                      <div className="flex justify-between items-start mb-1">
+                        <p className="font-bold text-charcoal-900 drop-shadow-sm"><span>{loan.borrower}</span></p>
+                        <p className="text-rose-500 font-mono text-sm font-bold"><span>{formatCurrency(loan.principal)}</span></p>
+                      </div>
+                      <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mt-2">
+                        <span>Vence: {format(new Date(loan.dueDate), "dd 'de' MMM, yyyy", { locale: es })}</span>
+                      </p>
                     </div>
-                    <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mt-2">
-                      Vence: {format(new Date(loan.dueDate), "dd 'de' MMM, yyyy", { locale: es })}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-slate-500 font-medium italic py-4">Sin préstamos por vencer pronto.</p>
-            )}
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-slate-500 font-medium italic py-4"><span>Sin préstamos por vencer pronto.</span></p>
+              )}
+            </div>
           </Card>
 
           <Card>
-            <h3 className="text-lg font-bold text-emerald-500 mb-6 drop-shadow-sm">Transacciones Recientes</h3>
-            <div className="space-y-4">
-              {transactions.slice(0, 4).map(tx => (
-                <div key={tx.id} className="flex justify-between items-center neu-inset p-3 rounded-2xl transition-transform hover:-translate-y-1 hover:shadow-lg">
-                  <div className="flex items-center gap-3">
-                    <div className={cn(
-                      "w-10 h-10 rounded-xl flex items-center justify-center bg-white/40 shadow-sm border border-white/50",
-                      tx.type === 'income' ? "text-emerald-500" : "text-rose-500"
+            <h3 className="text-lg font-bold text-emerald-500 mb-6 drop-shadow-sm"><span>Transacciones Recientes</span></h3>
+            <div className="space-y-4 notranslate">
+              {transactions.length > 0 ? (
+                transactions.slice(0, 4).map(tx => (
+                  <div key={tx.id} className="flex justify-between items-center neu-inset p-3 rounded-2xl transition-transform hover:-translate-y-1 hover:shadow-lg">
+                    <div className="flex items-center gap-3">
+                      <div className={cn(
+                        "w-10 h-10 rounded-xl flex items-center justify-center bg-white/40 shadow-sm border border-white/50",
+                        tx.type === 'income' ? "text-emerald-500" : "text-rose-500"
+                      )}>
+                        {tx.type === 'income' ? <TrendingUp className="w-5 h-5" /> : <TrendingDown className="w-5 h-5" />}
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-charcoal-900 drop-shadow-sm"><span>{tx.category}</span></p>
+                        <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mt-0.5"><span>{format(new Date(tx.date), "dd 'de' MMM", { locale: es })}</span></p>
+                      </div>
+                    </div>
+                    <p className={cn(
+                      "font-mono text-sm font-bold drop-shadow-sm",
+                      tx.type === 'income' ? "text-emerald-600" : "text-rose-600"
                     )}>
-                      {tx.type === 'income' ? <TrendingUp className="w-5 h-5" /> : <TrendingDown className="w-5 h-5" />}
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-charcoal-900 drop-shadow-sm">{tx.category}</p>
-                      <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mt-0.5">{format(new Date(tx.date), "dd 'de' MMM", { locale: es })}</p>
-                    </div>
+                      <span>{tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}</span>
+                    </p>
                   </div>
-                  <p className={cn(
-                    "font-mono text-sm font-bold drop-shadow-sm",
-                    tx.type === 'income' ? "text-emerald-600" : "text-rose-600"
-                  )}>
-                    {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
-                  </p>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-sm text-slate-500 font-medium italic py-4"><span>Sin actividad reciente.</span></p>
+              )}
             </div>
           </Card>
         </div>
