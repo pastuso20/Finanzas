@@ -10,21 +10,21 @@ import { formatCurrency } from '../utils';
 export function Investments() {
   const { investments, addInvestment, updateInvestmentValue } = useFinanceStore();
   const [showAddForm, setShowAddForm] = useState(false);
-  const [newInv, setNewInv] = useState({ assetName: '', symbol: '', initialInvestment: '', currentValue: '', purchaseDate: new Date().toISOString().split('T')[0] });
+  const [newInv, setNewInv] = useState({ assetName: '', description: '', initialInvestment: '', currentValue: '', purchaseDate: new Date().toISOString().split('T')[0] });
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newInv.assetName || !newInv.symbol || !newInv.initialInvestment || !newInv.currentValue) return;
+    if (!newInv.assetName || !newInv.description || !newInv.initialInvestment || !newInv.currentValue) return;
 
     addInvestment({
       assetName: newInv.assetName,
-      symbol: newInv.symbol.toUpperCase(),
+      description: newInv.description,
       initialInvestment: newInv.initialInvestment,
       currentValue: newInv.currentValue,
       purchaseDate: new Date(newInv.purchaseDate).toISOString()
     });
 
-    setNewInv({ assetName: '', symbol: '', initialInvestment: '', currentValue: '', purchaseDate: new Date().toISOString().split('T')[0] });
+    setNewInv({ assetName: '', description: '', initialInvestment: '', currentValue: '', purchaseDate: new Date().toISOString().split('T')[0] });
     setShowAddForm(false);
   };
 
@@ -37,12 +37,12 @@ export function Investments() {
     <div className="space-y-8 animate-in fade-in duration-500">
       <header className="flex justify-between items-end">
         <div>
-          <h2 className="text-3xl font-bold text-emerald-500 tracking-tight">Portafolio de Inversiones</h2>
-          <p className="text-slate-600 mt-1">Sigue el rendimiento y el ROI</p>
+          <h2 className="text-3xl font-bold text-emerald-500 tracking-tight">Emprendimientos e Inversiones</h2>
+          <p className="text-slate-600 mt-1">Sigue el rendimiento de tus negocios y proyectos</p>
         </div>
         <Button onClick={() => setShowAddForm(!showAddForm)} className="gap-2">
           {showAddForm ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-          {showAddForm ? 'Cancelar' : 'Nuevo Activo'}
+          {showAddForm ? 'Cancelar' : 'Nuevo Proyecto'}
         </Button>
       </header>
 
@@ -81,22 +81,22 @@ export function Investments() {
         <Card className="mb-6 border-emerald-500/30">
           <form onSubmit={handleAdd} className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
             <div className="space-y-2">
-              <Label htmlFor="assetName">Nombre del Activo</Label>
-              <Input id="assetName" value={newInv.assetName} onChange={e => setNewInv({ ...newInv, assetName: e.target.value })} placeholder="Ej. Tesla" required />
+              <Label htmlFor="assetName">Nombre del Proyecto</Label>
+              <Input id="assetName" value={newInv.assetName} onChange={e => setNewInv({ ...newInv, assetName: e.target.value })} placeholder="Ej. Startup X" required />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="symbol">Símbolo</Label>
-              <Input id="symbol" value={newInv.symbol} onChange={e => setNewInv({ ...newInv, symbol: e.target.value })} placeholder="TSLA" required />
+              <Label htmlFor="description">Descripción</Label>
+              <Input id="description" value={newInv.description} onChange={e => setNewInv({ ...newInv, description: e.target.value })} placeholder="Ej. Tecnología" required />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="initialInvestment">Inversión Inicial ($)</Label>
+              <Label htmlFor="initialInvestment">Capital Invertido ($)</Label>
               <Input id="initialInvestment" type="number" step="1" value={newInv.initialInvestment} onChange={e => setNewInv({ ...newInv, initialInvestment: e.target.value })} placeholder="0" required />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="currentValue">Valor Actual ($)</Label>
+              <Label htmlFor="currentValue">Valuación Actual ($)</Label>
               <Input id="currentValue" type="number" step="1" value={newInv.currentValue} onChange={e => setNewInv({ ...newInv, currentValue: e.target.value })} placeholder="0" required />
             </div>
-            <Button type="submit" className="w-full">Agregar Activo</Button>
+            <Button type="submit" className="w-full">Agregar Proyecto</Button>
           </form>
         </Card>
       )}
@@ -105,7 +105,7 @@ export function Investments() {
       <div className="space-y-4">
         <h3 className="text-xl font-bold text-emerald-500 mb-4 flex items-center gap-2">
           <BarChart3 className="w-5 h-5 text-emerald-500" />
-          Activos Individuales
+          Proyectos y Negocios
         </h3>
 
         <div className="grid grid-cols-1 gap-4">
@@ -130,11 +130,11 @@ export function Investments() {
                         isLoss ? "text-rose-600" :
                           "text-slate-500"
                     )}>
-                      {inv.symbol.substring(0, 2)}
+                      {inv.assetName.substring(0, 1)}
                     </div>
                     <div>
                       <h4 className="text-base md:text-lg font-bold text-charcoal-900 drop-shadow-sm leading-tight md:leading-normal">{inv.assetName}</h4>
-                      <p className="text-[10px] md:text-xs text-slate-500 font-bold uppercase tracking-wider mt-0.5 md:mt-1">{inv.symbol} <span className="hidden md:inline">• {format(new Date(inv.purchaseDate), 'MMM yyyy', { locale: es })}</span></p>
+                      <p className="text-[10px] md:text-xs text-slate-500 font-bold uppercase tracking-wider mt-0.5 md:mt-1">{inv.description} <span className="hidden md:inline">• {format(new Date(inv.purchaseDate), 'MMM yyyy', { locale: es })}</span></p>
                     </div>
                   </div>
 

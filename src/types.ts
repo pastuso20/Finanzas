@@ -22,10 +22,19 @@ export interface Loan {
 export interface Investment {
   id: string;
   assetName: string;
-  symbol: string;
+  description: string;
   initialInvestment: string;
   currentValue: string;
   purchaseDate: string;
+}
+
+export interface Debt {
+  id: string;
+  creditor: string;
+  amount: string;
+  dueDate: string;
+  status: 'pending' | 'paid';
+  notes?: string;
 }
 
 export interface NetWorthDataPoint {

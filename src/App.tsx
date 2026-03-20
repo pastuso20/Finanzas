@@ -4,6 +4,8 @@ import { Dashboard } from './views/Dashboard';
 import { Transactions } from './views/Transactions';
 import { Loans } from './views/Loans';
 import { Investments } from './views/Investments';
+import { Debts } from './views/Debts';
+import { Settings } from './views/Settings';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -18,6 +20,10 @@ export default function App() {
         return <Loans />;
       case 'investments':
         return <Investments />;
+      case 'debts':
+        return <Debts />;
+      case 'settings':
+        return <Settings />;
       default:
         return <Dashboard />;
     }

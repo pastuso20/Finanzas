@@ -20,16 +20,17 @@ const mockNetWorthData = [
 ];
 
 export function Dashboard() {
-  const { transactions, loans, investments } = useFinanceStore();
+  const { transactions, loans, investments, debts, initialBalance } = useFinanceStore();
 
   const totalInvestments = investments.reduce((acc, inv) => acc.plus(new Decimal(inv.currentValue)), new Decimal(0));
   const totalLoans = loans.filter(l => l.status === 'active').reduce((acc, loan) => acc.plus(new Decimal(loan.principal)), new Decimal(0));
+  const totalDebts = debts.filter(d => d.status === 'pending').reduce((acc, d) => acc.plus(new Decimal(d.amount)), new Decimal(0));
 
   const cashBalance = transactions.reduce((acc, tx) => {
     return tx.type === 'income' ? acc.plus(new Decimal(tx.amount)) : acc.minus(new Decimal(tx.amount));
-  }, new Decimal(25000000));
+  }, new Decimal(initialBalance));
 
-  const netWorth = totalInvestments.plus(totalLoans).plus(cashBalance);
+  const netWorth = totalInvestments.plus(totalLoans).plus(cashBalance).minus(totalDebts);
 
   const today = new Date();
   const thirtyDaysFromNow = addDays(today, 30);

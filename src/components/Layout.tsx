@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { LayoutDashboard, Wallet, HandCoins, TrendingUp, Settings, LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useFinanceStore } from '../store';
+import { LayoutDashboard, Wallet, HandCoins, TrendingUp, Settings, LogOut, ChevronLeft, ChevronRight, CreditCard } from 'lucide-react';
 import { cn } from './ui';
 
 interface LayoutProps {
@@ -10,12 +11,14 @@ interface LayoutProps {
 
 export function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const { userName } = useFinanceStore();
 
   const navItems = [
     { id: 'dashboard', label: 'Panel Principal', icon: LayoutDashboard },
     { id: 'transactions', label: 'Transacciones', icon: Wallet },
     { id: 'loans', label: 'Préstamos', icon: HandCoins },
     { id: 'investments', label: 'Inversiones', icon: TrendingUp },
+    { id: 'debts', label: 'Deudas', icon: CreditCard },
   ];
 
   return (
@@ -24,14 +27,27 @@ export function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
       {/* Mobile Header (Hidden on md+) */}
       <div className="md:hidden flex items-center justify-between p-5 pb-0 z-30 relative shrink-0">
         <div className="flex items-center gap-3">
-          <img src="/logo.png" alt="David Aite" className="w-12 h-12 object-contain drop-shadow-md shrink-0 transition-transform duration-300 hover:scale-105" />
+          <div className="videogame-coin-wrap shrink-0">
+            <img
+              src="/logo.png"
+              alt="David Aite"
+              className="w-14 h-14 object-contain videogame-coin"
+              style={{ filter: 'contrast(1.1) saturate(1.1) drop-shadow(0 5px 10px rgba(0,0,0,0.1))' }}
+            />
+          </div>
           <div>
-            <h1 className="font-bold text-emerald-500 text-xl tracking-tight leading-none">David Aite</h1>
+            <h1 className="font-bold text-emerald-500 text-xl tracking-tight leading-none">{userName}</h1>
             <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Finance</p>
           </div>
         </div>
         <div className="flex gap-2">
-          <button className="neu-button p-2.5 rounded-2xl text-slate-500 hover:text-emerald-500 transition-colors">
+          <button 
+            onClick={() => setActiveTab('settings')}
+            className={cn(
+              "p-2.5 rounded-2xl transition-all",
+              activeTab === 'settings' ? "neu-button-primary" : "neu-button text-slate-500 hover:text-emerald-500"
+            )}
+          >
             <Settings className="w-5 h-5 drop-shadow-sm" />
           </button>
           <button className="neu-button p-2.5 rounded-2xl text-slate-500 hover:text-rose-500 transition-colors">
@@ -56,20 +72,23 @@ export function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
 
           <div>
             <div className={cn("flex items-center mb-10", isCollapsed ? "justify-center" : "gap-3 px-2")}>
-              <img
-                src="/logo.png"
-                alt="David Aite"
-                className={cn(
-                  "object-contain drop-shadow-md transition-all duration-500 shrink-0 hover:scale-105",
-                  isCollapsed ? "w-12 h-12" : "w-12 h-12"
-                )}
-              />
+              <div className="videogame-coin-wrap shrink-0">
+                <img
+                  src="/logo.png"
+                  alt="David Aite"
+                  className={cn(
+                    "object-contain videogame-coin",
+                    isCollapsed ? "w-12 h-12" : "w-16 h-16"
+                  )}
+                  style={{ filter: 'contrast(1.1) saturate(1.1) drop-shadow(0 5px 10px rgba(0,0,0,0.1))' }}
+                />
+              </div>
               <div className={cn(
                 "transition-all duration-500 origin-left whitespace-nowrap overflow-hidden flex flex-col justify-center",
                 isCollapsed ? "max-w-0 opacity-0 scale-x-0" : "max-w-[200px] opacity-100 scale-x-100"
               )}>
                 <h1 className="font-bold text-emerald-500 text-xl tracking-tight leading-none pt-1">
-                  David Aite
+                  {userName}
                 </h1>
                 <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Finance</p>
               </div>
@@ -112,13 +131,21 @@ export function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
 
           <div className="space-y-3">
             <button
+              onClick={() => setActiveTab('settings')}
               title={isCollapsed ? "Configuración" : undefined}
               className={cn(
-                "w-full flex items-center rounded-2xl text-slate-500 hover:neu-button hover:text-emerald-500 transition-all font-bold group",
-                isCollapsed ? "justify-center p-3" : "py-3 px-4"
+                "w-full flex items-center rounded-2xl transition-all duration-300 font-bold group",
+                isCollapsed ? "justify-center p-3" : "py-3 px-4",
+                activeTab === 'settings'
+                  ? "neu-button-primary"
+                  : "text-slate-500 hover:neu-button hover:text-emerald-500"
               )}
             >
-              <Settings className={cn("shrink-0 transition-all duration-300 text-emerald-500/70 group-hover:text-emerald-500", isCollapsed ? "w-6 h-6" : "w-5 h-5 group-hover:rotate-45")} />
+              <Settings className={cn(
+                "shrink-0 transition-all duration-300 drop-shadow-sm",
+                isCollapsed ? "w-6 h-6" : "w-5 h-5",
+                activeTab === 'settings' ? "text-gold-500 scale-110" : "text-emerald-500/70 group-hover:text-emerald-500"
+              )} />
               <span className={cn(
                 "transition-all duration-500 whitespace-nowrap overflow-hidden flex-1 text-left",
                 isCollapsed ? "max-w-0 opacity-0 ml-0" : "max-w-[200px] opacity-100 ml-3"
@@ -160,7 +187,7 @@ export function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
 
       {/* Mobile Bottom Navigation Bar (Hidden on md+) */}
       <div className="md:hidden fixed bottom-4 left-4 right-4 z-50">
-        <div className="border border-white/60 shadow-[0_-10px_40px_rgba(0,79,57,0.08)] rounded-[2rem] p-1.5 flex justify-between items-center relative overflow-hidden bg-[rgba(255,250,202,0.6)]" style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
+        <div className="border border-white/60 shadow-[0_-10px_40px_rgba(0,79,57,0.08)] rounded-[2rem] p-1.5 flex justify-between items-center relative overflow-hidden bg-white/60" style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
