@@ -48,45 +48,52 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
   fetchData: async () => {
     set({ isLoading: true });
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
       
-      if (!user) {
+      if (userError || !user) {
+        console.warn('No authenticated user found');
         set({ isLoading: false, userId: null });
         return;
       }
 
-      set({ userId: user.id });
+      const currentUserId = user.id;
+      set({ userId: currentUserId });
 
+      // Queries for data - RLS will handle filtering by user_id
       const [
         { data: profile, error: profileError },
-        { data: txs },
-        { data: lns },
-        { data: invs },
-        { data: dbts }
+        { data: txs, error: txsError },
+        { data: lns, error: lnsError },
+        { data: invs, error: invsError },
+        { data: dbts, error: dbtsError }
       ] = await Promise.all([
-        supabase.from('profile').select('*').eq('id', user.id).maybeSingle(),
-        supabase.from('transactions').select('*').eq('user_id', user.id).order('date', { ascending: false }),
-        supabase.from('loans').select('*').eq('user_id', user.id).order('due_date', { ascending: true }),
-        supabase.from('investments').select('*').eq('user_id', user.id).order('purchase_date', { ascending: false }),
-        supabase.from('debts').select('*').eq('user_id', user.id).order('due_date', { ascending: true })
+        supabase.from('profile').select('*').maybeSingle(),
+        supabase.from('transactions').select('*').order('date', { ascending: false }),
+        supabase.from('loans').select('*').order('due_date', { ascending: true }),
+        supabase.from('investments').select('*').order('purchase_date', { ascending: false }),
+        supabase.from('debts').select('*').order('due_date', { ascending: true })
       ]);
 
-      if (profileError && profileError.code !== 'PGRST116') {
-        console.error('Error fetching profile:', profileError);
-      }
+      // Detailed logging for debugging
+      if (profileError) console.error('Supabase Profile Error:', profileError.message);
+      if (txsError) console.error('Supabase Transactions Error:', txsError.message);
+      if (lnsError) console.error('Supabase Loans Error:', lnsError.message);
+      if (invsError) console.error('Supabase Investments Error:', invsError.message);
+      if (dbtsError) console.error('Supabase Debts Error:', dbtsError.message);
 
       if (profile) {
         set({ userName: profile.user_name, initialBalance: profile.initial_balance.toString() });
-      } else {
-        // Create initial profile if it doesn't exist
+      } else if (!profileError) {
+        // Auto-create profile if it doesn't exist and there was no fetch error
+        console.log('Profile not found, creating one for user:', currentUserId);
         const { data: newProfile, error: createError } = await supabase
           .from('profile')
-          .insert({ id: user.id, user_name: 'David Aite', initial_balance: 0 })
+          .insert({ id: currentUserId, user_name: 'David Aite', initial_balance: 0 })
           .select()
           .maybeSingle();
 
         if (createError) {
-          console.error('Error creating profile:', createError);
+          console.error('Error auto-creating profile:', createError.message);
         } else if (newProfile) {
           set({ userName: newProfile.user_name, initialBalance: newProfile.initial_balance.toString() });
         }
@@ -100,30 +107,39 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
         isLoading: false
       });
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error('Unexpected error in fetchData:', error);
       set({ isLoading: false });
     }
   },
 
   setUserName: async (name) => {
     const { userId } = get();
-    if (userId) {
-      const { error } = await supabase.from('profile').update({ user_name: name }).eq('id', userId);
-      if (!error) set({ userName: name });
+    if (!userId) return;
+    const { error } = await supabase.from('profile').update({ user_name: name }).eq('id', userId);
+    if (error) {
+      console.error('Error updating user name:', error.message);
+    } else {
+      set({ userName: name });
     }
   },
 
   setInitialBalance: async (amount) => {
     const { userId } = get();
-    if (userId) {
-      const { error } = await supabase.from('profile').update({ initial_balance: parseFloat(amount) }).eq('id', userId);
-      if (!error) set({ initialBalance: amount });
+    if (!userId) return;
+    const { error } = await supabase.from('profile').update({ initial_balance: parseFloat(amount) }).eq('id', userId);
+    if (error) {
+      console.error('Error updating initial balance:', error.message);
+    } else {
+      set({ initialBalance: amount });
     }
   },
 
   addTransaction: async (tx) => {
     const { userId } = get();
-    if (!userId) return;
+    if (!userId) {
+      console.error('Cannot add transaction: No authenticated user');
+      return;
+    }
     const { data, error } = await supabase.from('transactions').insert({
       user_id: userId,
       type: tx.type,
@@ -132,12 +148,20 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
       date: tx.date,
       notes: tx.notes
     }).select().maybeSingle();
-    if (!error && data) set((state) => ({ transactions: [data, ...state.transactions] }));
+    
+    if (error) {
+      console.error('Error adding transaction:', error.message);
+    } else if (data) {
+      set((state) => ({ transactions: [data, ...state.transactions] }));
+    }
   },
 
   addLoan: async (loan) => {
     const { userId } = get();
-    if (!userId) return;
+    if (!userId) {
+      console.error('Cannot add loan: No authenticated user');
+      return;
+    }
     const { data, error } = await supabase.from('loans').insert({
       user_id: userId,
       borrower: loan.borrower,
@@ -147,12 +171,20 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
       start_date: loan.startDate,
       status: loan.status
     }).select().maybeSingle();
-    if (!error && data) set((state) => ({ loans: [data, ...state.loans] }));
+
+    if (error) {
+      console.error('Error adding loan:', error.message);
+    } else if (data) {
+      set((state) => ({ loans: [data, ...state.loans] }));
+    }
   },
 
   addInvestment: async (inv) => {
     const { userId } = get();
-    if (!userId) return;
+    if (!userId) {
+      console.error('Cannot add investment: No authenticated user');
+      return;
+    }
     const { data, error } = await supabase.from('investments').insert({
       user_id: userId,
       asset_name: inv.assetName,
@@ -161,21 +193,33 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
       current_value: parseFloat(inv.currentValue),
       purchase_date: inv.purchaseDate
     }).select().maybeSingle();
-    if (!error && data) set((state) => ({ investments: [data, ...state.investments] }));
+
+    if (error) {
+      console.error('Error adding investment:', error.message);
+    } else if (data) {
+      set((state) => ({ investments: [data, ...state.investments] }));
+    }
   },
 
   updateInvestmentValue: async (id, newValue) => {
     const { userId } = get();
     if (!userId) return;
-    const { error } = await supabase.from('investments').update({ current_value: parseFloat(newValue) }).eq('id', id).eq('user_id', userId);
-    if (!error) set((state) => ({
-      investments: state.investments.map(inv => inv.id === id ? { ...inv, currentValue: newValue } : inv)
-    }));
+    const { error } = await supabase.from('investments').update({ current_value: parseFloat(newValue) }).eq('id', id);
+    if (error) {
+      console.error('Error updating investment value:', error.message);
+    } else {
+      set((state) => ({
+        investments: state.investments.map(inv => inv.id === id ? { ...inv, currentValue: newValue } : inv)
+      }));
+    }
   },
 
   addDebt: async (debt) => {
     const { userId } = get();
-    if (!userId) return;
+    if (!userId) {
+      console.error('Cannot add debt: No authenticated user');
+      return;
+    }
     const { data, error } = await supabase.from('debts').insert({
       user_id: userId,
       creditor: debt.creditor,
@@ -184,7 +228,12 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
       status: debt.status,
       notes: debt.notes
     }).select().maybeSingle();
-    if (!error && data) set((state) => ({ debts: [data, ...state.debts] }));
+
+    if (error) {
+      console.error('Error adding debt:', error.message);
+    } else if (data) {
+      set((state) => ({ debts: [data, ...state.debts] }));
+    }
   },
 
   toggleDebtStatus: async (id) => {
@@ -193,76 +242,114 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
     const debt = debts.find(d => d.id === id);
     if (!debt) return;
     const newStatus = debt.status === 'pending' ? 'paid' : 'pending';
-    const { error } = await supabase.from('debts').update({ status: newStatus }).eq('id', id).eq('user_id', userId);
-    if (!error) set((state) => ({
-      debts: state.debts.map(d => d.id === id ? { ...d, status: newStatus } : d)
-    }));
+    const { error } = await supabase.from('debts').update({ status: newStatus }).eq('id', id);
+    if (error) {
+      console.error('Error toggling debt status:', error.message);
+    } else {
+      set((state) => ({
+        debts: state.debts.map(d => d.id === id ? { ...d, status: newStatus } : d)
+      }));
+    }
   },
 
   updateDebtAmount: async (id, newAmount) => {
     const { userId } = get();
     if (!userId) return;
-    const { error } = await supabase.from('debts').update({ amount: parseFloat(newAmount) }).eq('id', id).eq('user_id', userId);
-    if (!error) set((state) => ({
-      debts: state.debts.map(d => d.id === id ? { ...d, amount: newAmount } : d)
-    }));
+    const { error } = await supabase.from('debts').update({ amount: parseFloat(newAmount) }).eq('id', id);
+    if (error) {
+      console.error('Error updating debt amount:', error.message);
+    } else {
+      set((state) => ({
+        debts: state.debts.map(d => d.id === id ? { ...d, amount: newAmount } : d)
+      }));
+    }
   },
 
   updateTransactionAmount: async (id, newAmount) => {
     const { userId } = get();
     if (!userId) return;
-    const { error } = await supabase.from('transactions').update({ amount: parseFloat(newAmount) }).eq('id', id).eq('user_id', userId);
-    if (!error) set((state) => ({
-      transactions: state.transactions.map(t => t.id === id ? { ...t, amount: newAmount } : t)
-    }));
+    const { error } = await supabase.from('transactions').update({ amount: parseFloat(newAmount) }).eq('id', id);
+    if (error) {
+      console.error('Error updating transaction amount:', error.message);
+    } else {
+      set((state) => ({
+        transactions: state.transactions.map(t => t.id === id ? { ...t, amount: newAmount } : t)
+      }));
+    }
   },
 
   updateLoanPrincipal: async (id, newPrincipal) => {
     const { userId } = get();
     if (!userId) return;
-    const { error } = await supabase.from('loans').update({ principal: parseFloat(newPrincipal) }).eq('id', id).eq('user_id', userId);
-    if (!error) set((state) => ({
-      loans: state.loans.map(l => l.id === id ? { ...l, principal: newPrincipal } : l)
-    }));
+    const { error } = await supabase.from('loans').update({ principal: parseFloat(newPrincipal) }).eq('id', id);
+    if (error) {
+      console.error('Error updating loan principal:', error.message);
+    } else {
+      set((state) => ({
+        loans: state.loans.map(l => l.id === id ? { ...l, principal: newPrincipal } : l)
+      }));
+    }
   },
 
   clearAllData: async () => {
     const { userId } = get();
     if (!userId) return;
-    await Promise.all([
-      supabase.from('transactions').delete().eq('user_id', userId),
-      supabase.from('loans').delete().eq('user_id', userId),
-      supabase.from('investments').delete().eq('user_id', userId),
-      supabase.from('debts').delete().eq('user_id', userId)
+    const results = await Promise.all([
+      supabase.from('transactions').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+      supabase.from('loans').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+      supabase.from('investments').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+      supabase.from('debts').delete().neq('id', '00000000-0000-0000-0000-000000000000')
     ]);
+
+    const errors = results.filter(r => r.error);
+    if (errors.length > 0) {
+      console.error('Some errors occurred while clearing data:', errors.map(e => e.error?.message));
+    }
+    
     set({ transactions: [], loans: [], investments: [], debts: [] });
   },
 
   deleteTransaction: async (id) => {
     const { userId } = get();
     if (!userId) return;
-    const { error } = await supabase.from('transactions').delete().eq('id', id).eq('user_id', userId);
-    if (!error) set((state) => ({ transactions: state.transactions.filter(t => t.id !== id) }));
+    const { error } = await supabase.from('transactions').delete().eq('id', id);
+    if (error) {
+      console.error('Error deleting transaction:', error.message);
+    } else {
+      set((state) => ({ transactions: state.transactions.filter(t => t.id !== id) }));
+    }
   },
 
   deleteLoan: async (id) => {
     const { userId } = get();
     if (!userId) return;
-    const { error } = await supabase.from('loans').delete().eq('id', id).eq('user_id', userId);
-    if (!error) set((state) => ({ loans: state.loans.filter(l => l.id !== id) }));
+    const { error } = await supabase.from('loans').delete().eq('id', id);
+    if (error) {
+      console.error('Error deleting loan:', error.message);
+    } else {
+      set((state) => ({ loans: state.loans.filter(l => l.id !== id) }));
+    }
   },
 
   deleteInvestment: async (id) => {
     const { userId } = get();
     if (!userId) return;
-    const { error } = await supabase.from('investments').delete().eq('id', id).eq('user_id', userId);
-    if (!error) set((state) => ({ investments: state.investments.filter(inv => inv.id !== id) }));
+    const { error } = await supabase.from('investments').delete().eq('id', id);
+    if (error) {
+      console.error('Error deleting investment:', error.message);
+    } else {
+      set((state) => ({ investments: state.investments.filter(inv => inv.id !== id) }));
+    }
   },
 
   deleteDebt: async (id) => {
     const { userId } = get();
     if (!userId) return;
-    const { error } = await supabase.from('debts').delete().eq('id', id).eq('user_id', userId);
-    if (!error) set((state) => ({ debts: state.debts.filter(d => d.id !== id) }));
+    const { error } = await supabase.from('debts').delete().eq('id', id);
+    if (error) {
+      console.error('Error deleting debt:', error.message);
+    } else {
+      set((state) => ({ debts: state.debts.filter(d => d.id !== id) }));
+    }
   }
 }));
