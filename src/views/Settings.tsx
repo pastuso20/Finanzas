@@ -31,6 +31,15 @@ export function Settings() {
   const [isEditingBalance, setIsEditingBalance] = useState(false);
   const [newBalance, setNewBalance] = useState(initialBalance);
 
+  // Sync local state when store values change (e.g. after fetchData)
+  React.useEffect(() => {
+    setNewName(userName);
+  }, [userName]);
+
+  React.useEffect(() => {
+    setNewBalance(initialBalance);
+  }, [initialBalance]);
+
   const handleClearAll = () => {
     if (window.confirm('¿Estás seguro de que quieres borrar TODOS los datos? Esta acción no se puede deshacer.')) {
       clearAllData();

@@ -28,7 +28,7 @@ export function Dashboard() {
 
   const cashBalance = transactions.reduce((acc, tx) => {
     return tx.type === 'income' ? acc.plus(new Decimal(tx.amount)) : acc.minus(new Decimal(tx.amount));
-  }, new Decimal(initialBalance));
+  }, new Decimal(initialBalance || '0'));
 
   const netWorth = totalInvestments.plus(totalLoans).plus(cashBalance).minus(totalDebts);
 
@@ -104,8 +104,8 @@ export function Dashboard() {
             <h3 className="text-lg font-bold text-emerald-500">Evolución del Patrimonio</h3>
             <p className="text-sm text-slate-500 font-medium">Rendimiento en los últimos 7 meses</p>
           </div>
-          <div className="flex-1 w-full relative">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="flex-1 w-full min-h-[300px] relative">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
               <AreaChart data={mockNetWorthData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
