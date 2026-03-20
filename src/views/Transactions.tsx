@@ -18,16 +18,23 @@ export function Transactions() {
     e.preventDefault();
     if (!newTx.amount || !newTx.category) return;
 
-    await addTransaction({
-      type: newTx.type,
-      amount: newTx.amount,
-      category: newTx.category,
-      date: new Date(newTx.date).toISOString(),
-      notes: newTx.notes
-    });
+    try {
+      await addTransaction({
+        type: newTx.type,
+        amount: newTx.amount,
+        category: newTx.category,
+        date: new Date(newTx.date).toISOString(),
+        notes: newTx.notes
+      });
 
-    setNewTx({ type: 'expense', amount: '', category: '', date: new Date().toISOString().split('T')[0], notes: '' });
-    setShowAddForm(false);
+      // Clear form and close it in the next tick to ensure state is updated
+      setNewTx({ type: 'expense', amount: '', category: '', date: new Date().toISOString().split('T')[0], notes: '' });
+      setTimeout(() => {
+        setShowAddForm(false);
+      }, 0);
+    } catch (error) {
+      console.error('Error handling add transaction:', error);
+    }
   };
 
   const filteredTransactions = transactions.filter(tx => {

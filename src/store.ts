@@ -140,6 +140,8 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
       console.error('Cannot add transaction: No authenticated user');
       return;
     }
+    
+    console.log('Adding transaction to Supabase...', tx);
     const { data, error } = await supabase.from('transactions').insert({
       user_id: userId,
       type: tx.type,
@@ -150,9 +152,16 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
     }).select().maybeSingle();
     
     if (error) {
-      console.error('Error adding transaction:', error.message);
-    } else if (data) {
-      set((state) => ({ transactions: [data, ...state.transactions] }));
+      console.error('Supabase Error adding transaction:', error.message);
+      return;
+    } 
+    
+    if (data) {
+      console.log('Transaction added successfully:', data);
+      // Ensure immutable update and non-null state
+      set((state) => ({ 
+        transactions: [data, ...(state.transactions || [])] 
+      }));
     }
   },
 
@@ -175,7 +184,9 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
     if (error) {
       console.error('Error adding loan:', error.message);
     } else if (data) {
-      set((state) => ({ loans: [data, ...state.loans] }));
+      set((state) => ({ 
+        loans: [data, ...(state.loans || [])] 
+      }));
     }
   },
 
@@ -197,7 +208,9 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
     if (error) {
       console.error('Error adding investment:', error.message);
     } else if (data) {
-      set((state) => ({ investments: [data, ...state.investments] }));
+      set((state) => ({ 
+        investments: [data, ...(state.investments || [])] 
+      }));
     }
   },
 
@@ -209,7 +222,7 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
       console.error('Error updating investment value:', error.message);
     } else {
       set((state) => ({
-        investments: state.investments.map(inv => inv.id === id ? { ...inv, currentValue: newValue } : inv)
+        investments: (state.investments || []).map(inv => inv.id === id ? { ...inv, currentValue: newValue } : inv)
       }));
     }
   },
@@ -232,14 +245,16 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
     if (error) {
       console.error('Error adding debt:', error.message);
     } else if (data) {
-      set((state) => ({ debts: [data, ...state.debts] }));
+      set((state) => ({ 
+        debts: [data, ...(state.debts || [])] 
+      }));
     }
   },
 
   toggleDebtStatus: async (id) => {
     const { debts, userId } = get();
     if (!userId) return;
-    const debt = debts.find(d => d.id === id);
+    const debt = (debts || []).find(d => d.id === id);
     if (!debt) return;
     const newStatus = debt.status === 'pending' ? 'paid' : 'pending';
     const { error } = await supabase.from('debts').update({ status: newStatus }).eq('id', id);
@@ -247,7 +262,7 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
       console.error('Error toggling debt status:', error.message);
     } else {
       set((state) => ({
-        debts: state.debts.map(d => d.id === id ? { ...d, status: newStatus } : d)
+        debts: (state.debts || []).map(d => d.id === id ? { ...d, status: newStatus } : d)
       }));
     }
   },
@@ -260,7 +275,7 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
       console.error('Error updating debt amount:', error.message);
     } else {
       set((state) => ({
-        debts: state.debts.map(d => d.id === id ? { ...d, amount: newAmount } : d)
+        debts: (state.debts || []).map(d => d.id === id ? { ...d, amount: newAmount } : d)
       }));
     }
   },
@@ -273,7 +288,7 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
       console.error('Error updating transaction amount:', error.message);
     } else {
       set((state) => ({
-        transactions: state.transactions.map(t => t.id === id ? { ...t, amount: newAmount } : t)
+        transactions: (state.transactions || []).map(t => t.id === id ? { ...t, amount: newAmount } : t)
       }));
     }
   },
@@ -286,7 +301,7 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
       console.error('Error updating loan principal:', error.message);
     } else {
       set((state) => ({
-        loans: state.loans.map(l => l.id === id ? { ...l, principal: newPrincipal } : l)
+        loans: (state.loans || []).map(l => l.id === id ? { ...l, principal: newPrincipal } : l)
       }));
     }
   },
