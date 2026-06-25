@@ -175,8 +175,8 @@ export function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
         </div>
       </main>
 
-      {/* Mobile Bottom Navigation Bar (Refined) */}
-      <div className="md:hidden fixed bottom-4 left-4 right-4 z-50">
+      {/* Mobile Bottom Navigation Bar (All 6 items) */}
+      <div className="md:hidden fixed bottom-4 left-4 right-4 z-50 safe-bottom">
         <div className="bg-white/90 backdrop-blur-lg border border-slate-100 shadow-2xl rounded-[2.5rem] p-2 flex justify-between items-center relative overflow-hidden">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
@@ -191,10 +191,10 @@ export function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
                   isActive ? "text-emerald-800" : "text-slate-400"
                 )}
               >
-                <Icon className={cn("w-6 h-6 transition-transform duration-300", isActive ? "scale-110" : "")} />
+                <Icon className={cn("w-5 h-5 transition-transform duration-300", isActive ? "scale-110" : "")} />
                 {isActive && (
                   <>
-                    <span className="text-[10px] font-bold mt-1 tracking-wider uppercase">
+                    <span className="text-[9px] font-bold mt-1 tracking-wider uppercase">
                       <span>{item.mobileLabel ?? item.label.split(' ')[0]}</span>
                     </span>
                     <div className="bottom-nav-indicator" />
