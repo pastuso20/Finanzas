@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useFinanceStore } from '../store';
+import { supabase } from '../supabase';
 import { LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from './ui';
 import { NAV_ITEMS, SETTINGS_NAV } from '../config/navigation';
@@ -13,7 +14,14 @@ interface LayoutProps {
 export function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const userName = useFinanceStore(state => state.userName);
+  const setUserId = useFinanceStore(state => state.setUserId);
   const SettingsIcon = SETTINGS_NAV.icon;
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setUserId(null);
+    window.location.reload();
+  };
 
   return (
     <div className="min-h-screen bg-[#f9fafb] text-charcoal-900 flex flex-col md:flex-row md:items-start" translate="no">
@@ -40,7 +48,7 @@ export function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
           >
             <SettingsIcon className="w-5 h-5" />
           </button>
-          <button className="p-2.5 rounded-full bg-white shadow-sm border border-slate-100 text-slate-400 hover:text-rose-600 transition-all">
+          <button onClick={handleLogout} className="p-2.5 rounded-full bg-white shadow-sm border border-slate-100 text-slate-400 hover:text-rose-600 transition-all">
             <LogOut className="w-5 h-5" />
           </button>
         </div>
@@ -144,6 +152,7 @@ export function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
               </span>
             </button>
             <button
+              onClick={handleLogout}
               title={isCollapsed ? "Cerrar Sesión" : undefined}
               className={cn(
                 "w-full flex items-center rounded-2xl text-slate-500 hover:neu-button hover:text-rose-500 transition-colors font-bold group",

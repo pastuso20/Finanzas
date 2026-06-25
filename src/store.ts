@@ -25,6 +25,7 @@ interface FinanceState {
 
   // Actions
   fetchData: () => Promise<void>;
+  setUserId: (id: string | null) => void;
   setUserName: (name: string) => Promise<void>;
   setInitialBalance: (amount: string) => Promise<void>;
   addTransaction: (tx: Omit<Transaction, 'id'>) => Promise<void>;
@@ -58,6 +59,10 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
   savings: [],
   isLoading: true,
   userId: null,
+
+  setUserId: (id) => {
+    set({ userId: id });
+  },
 
   fetchData: async () => {
     set({ isLoading: true });
@@ -105,7 +110,7 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
         console.log('Profile not found, creating one for user:', currentUserId);
         const { data: newProfile, error: createError } = await supabase
           .from('profile')
-          .insert({ id: currentUserId, user_name: 'David Aite', initial_balance: 0 })
+          .upsert({ id: currentUserId, user_name: 'David Aite', initial_balance: 0 })
           .select()
           .maybeSingle();
 
