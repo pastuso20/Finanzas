@@ -480,11 +480,19 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
   },
 
   addSaving: async (saving) => {
-    const { userId } = get();
+    const { userId, transactions, initialBalance } = get();
     if (!userId) {
       console.error('Cannot add saving: No authenticated user');
       return;
     }
+
+    const amount = new Decimal(saving.currentAmount || '0');
+    const cash = getCashBalance(initialBalance, transactions);
+    if (amount.isPositive() && cash.lessThan(amount)) {
+      console.error('Insufficient cash for saving');
+      return;
+    }
+
     const { data, error } = await supabase.from('savings').insert({
       user_id: userId,
       name: saving.name,
@@ -497,14 +505,74 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
 
     if (error) {
       console.error('Error adding saving:', error.message);
-    } else if (data) {
-      set((state) => ({ savings: [mapSavingRow(data), ...(state.savings || [])] }));
+      return;
+    }
+
+    if (!data) return;
+
+    if (amount.isPositive()) {
+      const tx = await insertTransaction(userId, {
+        type: 'expense',
+        amount: saving.currentAmount,
+        category: 'Ahorro',
+        date: saving.startDate || new Date().toISOString(),
+        notes: `Aporte a ahorro: ${saving.name}`,
+      });
+
+      if (!tx) {
+        await supabase.from('savings').delete().eq('id', data.id);
+        return;
+      }
+
+      set((state) => ({
+        savings: [mapSavingRow(data), ...(state.savings || [])],
+        transactions: prependTransaction(state.transactions || [], tx),
+      }));
+    } else {
+      set((state) => ({
+        savings: [mapSavingRow(data), ...(state.savings || [])]
+      }));
     }
   },
 
   updateSavingAmount: async (id, newAmount) => {
-    const { userId } = get();
+    const { userId, savings, transactions, initialBalance } = get();
     if (!userId) return;
+
+    const saving = savings.find(s => s.id === id);
+    if (!saving) return;
+
+    const oldAmountDec = new Decimal(saving.currentAmount || '0');
+    const newAmountDec = new Decimal(newAmount || '0');
+    const diff = newAmountDec.minus(oldAmountDec);
+
+    if (!diff.isZero()) {
+      const cash = getCashBalance(initialBalance, transactions);
+      if (diff.isPositive() && cash.lessThan(diff)) {
+        console.error('Insufficient cash to increase saving');
+        return;
+      }
+
+      const tx = await insertTransaction(userId, {
+        type: diff.isPositive() ? 'expense' : 'income',
+        amount: diff.abs().toString(),
+        category: 'Ahorro',
+        date: new Date().toISOString(),
+        notes: diff.isPositive()
+          ? `Aporte a ahorro: ${saving.name}`
+          : `Retiro de ahorro: ${saving.name}`,
+      });
+
+      if (!tx) {
+        console.error('Error adjusting cash for saving update');
+        return;
+      }
+
+      set((state) => ({
+        transactions: prependTransaction(state.transactions || [], tx),
+      }));
+    }
+
     const { error } = await supabase.from('savings').update({ current_amount: parseMoney(newAmount) }).eq('id', id);
     if (error) {
       console.error('Error updating saving amount:', error.message);
@@ -641,8 +709,30 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
   },
 
   deleteSaving: async (id) => {
-    const { userId } = get();
+    const { userId, savings } = get();
     if (!userId) return;
+
+    const saving = savings.find(s => s.id === id);
+    if (!saving) return;
+
+    const amountDec = new Decimal(saving.currentAmount || '0');
+
+    if (amountDec.isPositive()) {
+      const tx = await insertTransaction(userId, {
+        type: 'income',
+        amount: saving.currentAmount,
+        category: 'Ahorro',
+        date: new Date().toISOString(),
+        notes: `Retiro por eliminación de ahorro: ${saving.name}`,
+      });
+
+      if (!tx) return;
+
+      set((state) => ({
+        transactions: prependTransaction(state.transactions || [], tx),
+      }));
+    }
+
     const { error } = await supabase.from('savings').delete().eq('id', id);
     if (error) {
       console.error('Error deleting saving:', error.message);
