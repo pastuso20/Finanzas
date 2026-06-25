@@ -3,10 +3,17 @@ import { useFinanceStore } from '../store';
 import { Card, cn } from '../components/ui';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { TrendingUp, TrendingDown, AlertCircle, DollarSign, Activity } from 'lucide-react';
-import Decimal from 'decimal.js';
 import { format, isBefore, addDays } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { formatCurrency } from '../utils';
+import { formatCurrency, safeDate } from '../utils';
+import {
+  selectCashBalance,
+  selectNetWorth,
+  selectActiveInvestmentsValue,
+  selectTotalSavings,
+  selectActiveLoansPrincipal,
+  selectPendingDebts,
+} from '../selectors';
 
 // Constantes de ejemplo ajustadas a COP
 const mockNetWorthData = [
@@ -20,28 +27,35 @@ const mockNetWorthData = [
 ];
 
 export function Dashboard() {
+  const initialBalance = useFinanceStore(state => state.initialBalance);
   const transactions = useFinanceStore(state => state.transactions);
   const loans = useFinanceStore(state => state.loans);
   const investments = useFinanceStore(state => state.investments);
   const debts = useFinanceStore(state => state.debts);
-  const initialBalance = useFinanceStore(state => state.initialBalance);
+  const savings = useFinanceStore(state => state.savings);
 
-  const totalInvestments = investments.reduce((acc, inv) => acc.plus(new Decimal(inv.currentValue)), new Decimal(0));
-  const totalLoans = loans.filter(l => l.status === 'active').reduce((acc, loan) => acc.plus(new Decimal(loan.principal)), new Decimal(0));
-  const totalDebts = debts.filter(d => d.status === 'pending').reduce((acc, d) => acc.plus(new Decimal(d.amount)), new Decimal(0));
+  const snapshot = {
+    initialBalance,
+    transactions,
+    loans,
+    investments,
+    debts,
+    savings,
+  };
 
-  const cashBalance = transactions.reduce((acc, tx) => {
-    return tx.type === 'income' ? acc.plus(new Decimal(tx.amount)) : acc.minus(new Decimal(tx.amount));
-  }, new Decimal(initialBalance || '0'));
-
-  const netWorth = totalInvestments.plus(totalLoans).plus(cashBalance).minus(totalDebts);
+  const totalInvestments = selectActiveInvestmentsValue(snapshot.investments);
+  const totalSavings = selectTotalSavings(snapshot.savings);
+  const totalLoans = selectActiveLoansPrincipal(snapshot.loans);
+  const totalDebts = selectPendingDebts(snapshot.debts);
+  const cashBalance = selectCashBalance(snapshot);
+  const netWorth = selectNetWorth(snapshot);
 
   const today = new Date();
   const thirtyDaysFromNow = addDays(today, 30);
-  const expiringLoans = loans.filter(l =>
-    l.status === 'active' &&
-    isBefore(new Date(l.dueDate), thirtyDaysFromNow)
-  );
+  const expiringLoans = loans.filter(l => {
+    const due = safeDate(l.dueDate);
+    return l.status === 'active' && due != null && isBefore(due, thirtyDaysFromNow);
+  });
 
   return (
     <div className="space-y-6 md:space-y-10 animate-in fade-in duration-500 pb-20 md:pb-0" translate="no">
@@ -51,7 +65,7 @@ export function Dashboard() {
           <h2 className="text-4xl md:text-5xl font-bold text-emerald-900 tracking-tight font-serif"><span>Resumen General</span></h2>
           <p className="text-slate-400 text-sm md:text-base mt-2"><span>Tu centro de comando financiero</span></p>
         </div>
-        
+
         {/* Patrimonio Neto - Mobile Premium UI */}
         <div className="w-full md:w-auto bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-emerald-900/5 p-8 md:p-10 flex flex-col md:items-end relative overflow-hidden group notranslate">
           <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50/50 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110" />
@@ -173,7 +187,7 @@ export function Dashboard() {
                         <p className="text-rose-500 font-mono text-sm font-bold"><span>{formatCurrency(loan.principal)}</span></p>
                       </div>
                       <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mt-2">
-                        <span>Vence: {format(new Date(loan.dueDate), "dd 'de' MMM, yyyy", { locale: es })}</span>
+                        <span>Vence: {safeDate(loan.dueDate) ? format(safeDate(loan.dueDate)!, "dd 'de' MMM, yyyy", { locale: es }) : 'Sin fecha'}</span>
                       </p>
                     </div>
                   ))}
@@ -187,8 +201,8 @@ export function Dashboard() {
           <Card>
             <h3 className="text-lg font-bold text-emerald-500 mb-6 drop-shadow-sm"><span>Transacciones Recientes</span></h3>
             <div className="space-y-4 notranslate">
-              {transactions.length > 0 ? (
-                transactions.slice(0, 4).map(tx => (
+              {snapshot.transactions.length > 0 ? (
+                snapshot.transactions.slice(0, 4).map(tx => (
                   <div key={tx.id} className="flex justify-between items-center neu-inset p-3 rounded-2xl transition-transform hover:-translate-y-1 hover:shadow-lg">
                     <div className="flex items-center gap-3">
                       <div className={cn(
@@ -199,7 +213,7 @@ export function Dashboard() {
                       </div>
                       <div>
                         <p className="text-sm font-bold text-charcoal-900 drop-shadow-sm"><span>{tx.category}</span></p>
-                        <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mt-0.5"><span>{format(new Date(tx.date), "dd 'de' MMM", { locale: es })}</span></p>
+                        <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mt-0.5"><span>{safeDate(tx.date) ? format(safeDate(tx.date)!, "dd 'de' MMM", { locale: es }) : '—'}</span></p>
                       </div>
                     </div>
                     <p className={cn(

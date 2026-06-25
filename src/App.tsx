@@ -1,43 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import { Layout } from './components/Layout';
-import { Dashboard } from './views/Dashboard';
-import { Transactions } from './views/Transactions';
-import { Loans } from './views/Loans';
-import { Investments } from './views/Investments';
-import { Debts } from './views/Debts';
-import { Settings } from './views/Settings';
 import { useFinanceStore } from './store';
 import { supabase } from './supabase';
+import { VIEW_BY_TAB, isAppTab, type AppTab } from './config/navigation';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState<AppTab>('dashboard');
   const { fetchData, isLoading } = useFinanceStore();
   const userId = useFinanceStore(state => state.userId);
 
+  const handleTabChange = (tab: string) => {
+    if (isAppTab(tab)) setActiveTab(tab);
+  };
+
   useEffect(() => {
     const initApp = async () => {
-      // New fixed credentials
       const fixedEmail = 'admin@prestige.finance';
       const fixedPassword = 'Prestige2024!';
 
       const { data: { user } } = await supabase.auth.getUser();
-      
-      // If there's a user but it's not the one we want, sign out
+
       if (user && user.email !== fixedEmail) {
         await supabase.auth.signOut();
-        window.location.reload(); // Reload to start fresh with the new user
+        window.location.reload();
         return;
       }
 
       if (!user) {
-        // Try to sign in
         const { error: signInError } = await supabase.auth.signInWithPassword({
           email: fixedEmail,
           password: fixedPassword,
         });
 
         if (signInError) {
-          // If user doesn't exist, sign up
           if (signInError.message.includes('Invalid login credentials')) {
             const { error: signUpError } = await supabase.auth.signUp({
               email: fixedEmail,
@@ -80,7 +75,7 @@ export default function App() {
           </div>
           <h2 className="text-2xl font-bold text-emerald-900 mb-4">Error de Autenticación</h2>
           <p className="text-slate-600 mb-8">No se pudo establecer una sesión segura. Por favor, verifica tu conexión o intenta recargar la página.</p>
-          <button 
+          <button
             onClick={() => window.location.reload()}
             className="w-full bg-emerald-600 text-white font-bold py-4 rounded-2xl hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-200"
           >
@@ -91,28 +86,11 @@ export default function App() {
     );
   }
 
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'dashboard':
-        return <Dashboard key="dashboard" />;
-      case 'transactions':
-        return <Transactions key="transactions" />;
-      case 'loans':
-        return <Loans key="loans" />;
-      case 'investments':
-        return <Investments key="investments" />;
-      case 'debts':
-        return <Debts key="debts" />;
-      case 'settings':
-        return <Settings key="settings" />;
-      default:
-        return <Dashboard key="dashboard" />;
-    }
-  };
+  const ActiveView = VIEW_BY_TAB[activeTab];
 
   return (
-    <Layout activeTab={activeTab} setActiveTab={setActiveTab}>
-      {renderContent()}
+    <Layout activeTab={activeTab} setActiveTab={handleTabChange}>
+      <ActiveView key={activeTab} />
     </Layout>
   );
 }

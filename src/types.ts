@@ -24,8 +24,11 @@ export interface Investment {
   assetName: string;
   description: string;
   initialInvestment: string;
+  productPricePerUnit: string;
+  totalProductQuantity: string;
   currentValue: string;
   purchaseDate: string;
+  status: 'active' | 'completed';
 }
 
 export interface Debt {
@@ -34,6 +37,16 @@ export interface Debt {
   amount: string;
   dueDate: string;
   status: 'pending' | 'paid';
+  notes?: string;
+}
+
+export interface Saving {
+  id: string;
+  name: string;
+  category: string;
+  currentAmount: string;
+  goalAmount: string;
+  startDate: string;
   notes?: string;
 }
 

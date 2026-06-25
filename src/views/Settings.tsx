@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useFinanceStore } from '../store';
 import { Card, Button, Input, cn } from '../components/ui';
 import { Trash2, AlertTriangle, User, Database, RefreshCw, Check, X, Edit3 } from 'lucide-react';
+import { formatCurrency } from '../utils';
 
 export function Settings() {
   const { 
@@ -12,16 +13,17 @@ export function Settings() {
     transactions, 
     loans, 
     investments, 
-    debts, 
+    debts,
+    savings,
     clearAllData,
     deleteTransaction,
     deleteLoan,
     deleteInvestment,
     deleteDebt,
-    updateInvestmentValue,
+    updateInvestmentPrice,
     updateDebtAmount,
     updateTransactionAmount,
-    updateLoanPrincipal
+    updateLoan
   } = useFinanceStore();
 
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -204,7 +206,7 @@ export function Settings() {
             <h3 className="text-xl font-bold text-charcoal-900"><span>Revisión de Datos</span></h3>
           </div>
           <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">
-            <span>Total registros: {transactions.length + loans.length + investments.length + debts.length}</span>
+            <span>Total registros: {transactions.length + loans.length + investments.length + debts.length + savings.length}</span>
           </p>
         </div>
 
@@ -226,7 +228,7 @@ export function Settings() {
                         />
                         <button 
                           onClick={() => {
-                            updateInvestmentValue(inv.id, editValue);
+                            updateInvestmentPrice(inv.id, editValue);
                             setEditingId(null);
                           }}
                           className="text-emerald-500 hover:text-emerald-600"
@@ -240,19 +242,24 @@ export function Settings() {
                     ) : (
                       <>
                         <div className="flex flex-col">
-                          <span className="font-bold">{inv.assetName}</span>
-                          <span className="text-[10px] text-slate-400 font-mono">${Number(inv.currentValue).toLocaleString()}</span>
+                          <span className="font-bold">
+                            {inv.assetName}
+                            {inv.status === 'completed' && <span className="ml-1 text-[10px] text-slate-400 uppercase">(completado)</span>}
+                          </span>
+                          <span className="text-[10px] text-slate-400 font-mono">{formatCurrency(inv.productPricePerUnit)}/u × {inv.totalProductQuantity}</span>
                         </div>
                         <div className="flex gap-2">
+                          {inv.status === 'active' && (
                           <button 
                             onClick={() => {
                               setEditingId(inv.id);
-                              setEditValue(inv.currentValue);
+                              setEditValue(inv.productPricePerUnit);
                             }}
                             className="text-slate-400 hover:text-emerald-500 transition-colors"
                           >
                             <Edit3 className="w-4 h-4" />
                           </button>
+                          )}
                           <button onClick={() => deleteInvestment(inv.id)} className="text-slate-400 hover:text-rose-500 transition-colors">
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -346,7 +353,7 @@ export function Settings() {
                         />
                         <button 
                           onClick={() => {
-                            updateLoanPrincipal(l.id, editValue);
+                            updateLoan(l.id, { principal: editValue });
                             setEditingId(null);
                           }}
                           className="text-emerald-500 hover:text-emerald-600"
