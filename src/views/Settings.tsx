@@ -84,8 +84,8 @@ export function Settings() {
                     <div className="flex gap-2">
                       <Button 
                         className="flex-1 h-11 rounded-xl bg-emerald-900 font-bold"
-                        onClick={() => {
-                          setUserName(newName);
+                        onClick={async () => {
+                          await setUserName(newName);
                           setIsEditingName(false);
                         }}
                       >
@@ -131,8 +131,8 @@ export function Settings() {
                     <div className="flex gap-2">
                       <Button 
                         className="flex-1 h-11 rounded-xl bg-emerald-900 font-bold"
-                        onClick={() => {
-                          setInitialBalance(newBalance);
+                        onClick={async () => {
+                          await setInitialBalance(newBalance);
                           setIsEditingBalance(false);
                         }}
                       >
