@@ -144,8 +144,8 @@ export default function Login() {
                 transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
                 className="absolute inset-0 border-2 border-emerald-400/30 rounded-3xl"
               />
-              <div className="w-20 h-20 bg-gradient-to-br from-emerald-400 to-green-500 rounded-3xl flex items-center justify-center shadow-2xl shadow-emerald-500/30 backdrop-blur-xl border border-white/20">
-                <span className="text-emerald-950 text-base font-bold tracking-tight text-center leading-tight">Cuido mi<br />bolsillo</span>
+              <div className="w-20 h-20 bg-gradient-to-br from-emerald-400 to-green-500 rounded-3xl flex items-center justify-center shadow-2xl shadow-emerald-500/30 backdrop-blur-xl border border-white/20 overflow-hidden">
+                <img src="/logo-login.png" alt="Cuido mi bolsillo" className="w-full h-full object-contain" />
               </div>
             </motion.div>
             
@@ -168,7 +168,13 @@ export default function Login() {
           </div>
 
           {/* Right Form Section */}
-          <div className="lg:w-1/2 p-8 lg:p-12 bg-white">
+          <div className="lg:w-1/2 p-8 lg:p-12 bg-white relative">
+            {/* Watermark Logo */}
+            <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none">
+              <img src="/logo-login.png" alt="Watermark" className="w-48 h-48 object-contain" />
+            </div>
+            
+            <div className="relative z-10">
             <motion.h2
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -296,6 +302,7 @@ export default function Login() {
                 </motion.button>
               </p>
             </motion.div>
+            </div>
           </div>
         </div>
       </motion.div>
