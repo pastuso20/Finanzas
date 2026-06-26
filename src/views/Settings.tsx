@@ -32,6 +32,8 @@ export function Settings() {
   const [newName, setNewName] = useState(userName);
   const [isEditingBalance, setIsEditingBalance] = useState(false);
   const [newBalance, setNewBalance] = useState(initialBalance);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Sync local state when store values change (e.g. after fetchData)
   React.useEffect(() => {
@@ -68,6 +70,11 @@ export function Settings() {
             </div>
           </div>
           
+          {saveError && (
+            <div className="col-span-1 md:col-span-2 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm font-medium">
+              {saveError}
+            </div>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Nombre de Usuario */}
             <div className="space-y-3">
@@ -84,17 +91,31 @@ export function Settings() {
                     <div className="flex gap-2">
                       <Button 
                         className="flex-1 h-11 rounded-xl bg-emerald-900 font-bold"
+                        disabled={isSaving}
                         onClick={async () => {
-                          await setUserName(newName);
-                          setIsEditingName(false);
+                          setIsSaving(true);
+                          setSaveError(null);
+                          try {
+                            await setUserName(newName);
+                            setIsEditingName(false);
+                          } catch (error) {
+                            setSaveError('Error al guardar el nombre');
+                            console.error(error);
+                          } finally {
+                            setIsSaving(false);
+                          }
                         }}
                       >
-                        <span>Guardar</span>
+                        <span>{isSaving ? 'Guardando...' : 'Guardar'}</span>
                       </Button>
                       <Button 
                         variant="outline" 
                         className="flex-1 h-11 rounded-xl font-bold border-slate-200"
-                        onClick={() => setIsEditingName(false)}
+                        disabled={isSaving}
+                        onClick={() => {
+                          setIsEditingName(false);
+                          setSaveError(null);
+                        }}
                       >
                         <span>Cancelar</span>
                       </Button>
@@ -131,17 +152,31 @@ export function Settings() {
                     <div className="flex gap-2">
                       <Button 
                         className="flex-1 h-11 rounded-xl bg-emerald-900 font-bold"
+                        disabled={isSaving}
                         onClick={async () => {
-                          await setInitialBalance(newBalance);
-                          setIsEditingBalance(false);
+                          setIsSaving(true);
+                          setSaveError(null);
+                          try {
+                            await setInitialBalance(newBalance);
+                            setIsEditingBalance(false);
+                          } catch (error) {
+                            setSaveError('Error al guardar el saldo inicial');
+                            console.error(error);
+                          } finally {
+                            setIsSaving(false);
+                          }
                         }}
                       >
-                        <span>Guardar</span>
+                        <span>{isSaving ? 'Guardando...' : 'Guardar'}</span>
                       </Button>
                       <Button 
                         variant="outline" 
                         className="flex-1 h-11 rounded-xl font-bold border-slate-200"
-                        onClick={() => setIsEditingBalance(false)}
+                        disabled={isSaving}
+                        onClick={() => {
+                          setIsEditingBalance(false);
+                          setSaveError(null);
+                        }}
                       >
                         <span>Cancelar</span>
                       </Button>

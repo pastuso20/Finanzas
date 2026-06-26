@@ -143,10 +143,13 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
 
   setUserName: async (name) => {
     const { userId } = get();
-    if (!userId) return;
+    if (!userId) {
+      throw new Error('No authenticated user found');
+    }
     const { error } = await supabase.from('profile').update({ user_name: name }).eq('id', userId);
     if (error) {
       console.error('Error updating user name:', error.message);
+      throw new Error(error.message);
     } else {
       set({ userName: name });
     }
@@ -154,10 +157,13 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
 
   setInitialBalance: async (amount) => {
     const { userId } = get();
-    if (!userId) return;
+    if (!userId) {
+      throw new Error('No authenticated user found');
+    }
     const { error } = await supabase.from('profile').update({ initial_balance: parseMoney(amount) }).eq('id', userId);
     if (error) {
       console.error('Error updating initial balance:', error.message);
+      throw new Error(error.message);
     } else {
       set({ initialBalance: amount });
     }
