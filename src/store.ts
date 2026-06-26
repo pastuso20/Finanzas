@@ -600,12 +600,50 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
     const debt = (debts || []).find(d => d.id === id);
     if (!debt) return;
     const newStatus = debt.status === 'pending' ? 'paid' : 'pending';
-    const { error } = await supabase.from('debts').update({ status: newStatus }).eq('id', id);
-    if (error) {
-      console.error('Error toggling debt status:', error.message);
-    } else {
+    
+    const { error: statusError } = await supabase.from('debts').update({ status: newStatus }).eq('id', id);
+    if (statusError) {
+      console.error('Error toggling debt status:', statusError.message);
+      return;
+    }
+
+    // Create transaction when marking debt as paid (expense) or pending (income to reverse)
+    if (newStatus === 'paid') {
+      const tx = await insertTransaction(userId, {
+        type: 'expense',
+        amount: debt.amount,
+        category: 'Pago Deuda',
+        date: new Date().toISOString(),
+        notes: `Pago de deuda a ${debt.creditor}`,
+      });
+
+      if (!tx) {
+        await supabase.from('debts').update({ status: debt.status }).eq('id', id);
+        return;
+      }
+
       set((state) => ({
-        debts: (state.debts || []).map(d => d.id === id ? { ...d, status: newStatus } : d)
+        debts: (state.debts || []).map(d => d.id === id ? { ...d, status: newStatus } : d),
+        transactions: prependTransaction(state.transactions || [], tx),
+      }));
+    } else {
+      // When marking as pending again, create income transaction to reverse the payment
+      const tx = await insertTransaction(userId, {
+        type: 'income',
+        amount: debt.amount,
+        category: 'Reversión Pago Deuda',
+        date: new Date().toISOString(),
+        notes: `Reversión de pago de deuda a ${debt.creditor}`,
+      });
+
+      if (!tx) {
+        await supabase.from('debts').update({ status: debt.status }).eq('id', id);
+        return;
+      }
+
+      set((state) => ({
+        debts: (state.debts || []).map(d => d.id === id ? { ...d, status: newStatus } : d),
+        transactions: prependTransaction(state.transactions || [], tx),
       }));
     }
   },

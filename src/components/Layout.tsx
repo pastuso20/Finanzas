@@ -28,18 +28,12 @@ export function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
 
       {/* Mobile Header (Refined UI/UX) */}
       <div className="md:hidden flex items-center justify-between p-6 z-30 relative shrink-0 bg-white/50 backdrop-blur-md">
-        <div className="flex items-center gap-3">
-          <div className="avatar-gold-border">
-            <img
-              src="/logo.png"
-              alt={userName || 'User'}
-              className="w-12 h-12 object-cover"
-            />
-          </div>
-          <div className="flex flex-col">
-            <h1 className="font-bold text-emerald-900 text-lg tracking-tight leading-none"><span>{userName}</span></h1>
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1"><span>Finance</span></p>
-          </div>
+        <div className="flex items-center justify-center">
+          <img
+            src="/logo.png"
+            alt={userName || 'User'}
+            className="w-24 h-24 object-contain"
+          />
         </div>
         <div className="flex gap-3">
           <button
@@ -68,27 +62,24 @@ export function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
             {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
           </button>
 
-          <div className="shrink-0">
-            <div className={cn("flex items-center mb-6", isCollapsed ? "justify-center" : "gap-3 px-2")}>
-              <div className="videogame-coin-wrap shrink-0">
+          <div className="shrink-0 mt-8">
+            <div className={cn("flex items-center mb-6", isCollapsed ? "justify-center" : "justify-center")}>
+              <div className={cn(
+                "relative flex items-center justify-center",
+                isCollapsed ? "w-16 h-16" : "w-24 h-24"
+              )}>
                 <img
                   src="/logo.png"
                   alt="Logo"
-                  className={cn(
-                    "object-contain videogame-coin",
-                    isCollapsed ? "w-10 h-10" : "w-14 h-14"
-                  )}
-                  style={{ filter: 'contrast(1.1) saturate(1.1) drop-shadow(0 5px 10px rgba(0,0,0,0.1))' }}
+                  className="object-contain origin-center"
+                  style={{
+                    '--tw-scale-x': '120%',
+                    '--tw-scale-y': '120%',
+                    '--tw-scale-z': '120%',
+                    transform: 'scaleX(120%) scaleY(120%) scaleZ(120%)',
+                    marginBottom: '3rem'
+                  } as React.CSSProperties}
                 />
-              </div>
-              <div className={cn(
-                "transition-all duration-500 origin-left whitespace-nowrap overflow-hidden flex flex-col justify-center",
-                isCollapsed ? "max-w-0 opacity-0 scale-x-0" : "max-w-[200px] opacity-100 scale-x-100"
-              )}>
-                <h1 className="font-bold text-emerald-500 text-xl tracking-tight leading-none pt-1">
-                  <span>{userName}</span>
-                </h1>
-                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5"><span>Finance</span></p>
               </div>
             </div>
 
@@ -125,49 +116,20 @@ export function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
                 );
               })}
             </nav>
+
+            <div className="flex gap-3 justify-center mt-auto pt-4">
+              <button
+                onClick={() => setActiveTab(SETTINGS_NAV.id)}
+                className="p-2.5 rounded-full bg-white shadow-sm border border-slate-100 text-slate-400 hover:text-emerald-600 transition-all"
+              >
+                <SettingsIcon className="w-5 h-5" />
+              </button>
+              <button onClick={handleLogout} className="p-2.5 rounded-full bg-white shadow-sm border border-slate-100 text-slate-400 hover:text-rose-600 transition-all">
+                <LogOut className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
-          <div className="space-y-2 shrink-0 mt-auto pt-4">
-            <button
-              onClick={() => setActiveTab(SETTINGS_NAV.id)}
-              title={isCollapsed ? SETTINGS_NAV.label : undefined}
-              className={cn(
-                "w-full flex items-center rounded-2xl transition-colors duration-300 font-bold group",
-                isCollapsed ? "justify-center h-11 p-0" : "h-11 py-0 px-4",
-                activeTab === SETTINGS_NAV.id
-                  ? "neu-button-primary"
-                  : "text-slate-500 hover:neu-button hover:text-emerald-500"
-              )}
-            >
-              <SettingsIcon className={cn(
-                "shrink-0 drop-shadow-sm",
-                isCollapsed ? "w-5 h-5" : "w-5 h-5",
-                activeTab === SETTINGS_NAV.id ? "text-gold-500" : "text-emerald-500/70 group-hover:text-emerald-500"
-              )} />
-              <span className={cn(
-                "transition-all duration-500 whitespace-nowrap overflow-hidden flex-1 text-left",
-                isCollapsed ? "max-w-0 opacity-0 ml-0" : "max-w-[200px] opacity-100 ml-3"
-              )}>
-                <span>{SETTINGS_NAV.label}</span>
-              </span>
-            </button>
-            <button
-              onClick={handleLogout}
-              title={isCollapsed ? "Cerrar Sesión" : undefined}
-              className={cn(
-                "w-full flex items-center rounded-2xl text-slate-500 hover:neu-button hover:text-rose-500 transition-colors font-bold group",
-                isCollapsed ? "justify-center h-11 p-0" : "h-11 py-0 px-4"
-              )}
-            >
-              <LogOut className={cn("shrink-0 text-emerald-500/70 group-hover:text-rose-500", isCollapsed ? "w-5 h-5" : "w-5 h-5")} />
-              <span className={cn(
-                "transition-all duration-500 whitespace-nowrap overflow-hidden flex-1 text-left",
-                isCollapsed ? "max-w-0 opacity-0 ml-0" : "max-w-[200px] opacity-100 ml-3"
-              )}>
-                <span>Cerrar Sesión</span>
-              </span>
-            </button>
-          </div>
         </aside>
       </div>
 
