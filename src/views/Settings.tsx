@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useFinanceStore } from '../store';
 import { Card, Button, Input, cn } from '../components/ui';
-import { Trash2, AlertTriangle, User, Database, RefreshCw, Check, X, Edit3 } from 'lucide-react';
+import { Trash2, AlertTriangle, User, Database, RefreshCw, Check, X, Edit3, MessageCircle } from 'lucide-react';
+import { supabase } from '../supabase';
 import { formatCurrency } from '../utils';
 
 export function Settings() {
@@ -34,6 +35,32 @@ export function Settings() {
   const [newBalance, setNewBalance] = useState(initialBalance);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+
+  const [linkCode, setLinkCode] = useState<string | null>(null);
+  const [isGeneratingCode, setIsGeneratingCode] = useState(false);
+
+  const generateTelegramCode = async () => {
+    setIsGeneratingCode(true);
+    try {
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('No user logged in');
+
+      const { error } = await supabase
+        .from('profile')
+        .update({ telegram_link_code: code })
+        .eq('id', user.id);
+
+      if (error) throw error;
+      setLinkCode(code);
+    } catch (err) {
+      console.error(err);
+      setSaveError('Error al generar código de Telegram');
+    } finally {
+      setIsGeneratingCode(false);
+    }
+  };
 
   // Sync local state when store values change (e.g. after fetchData)
   React.useEffect(() => {
@@ -204,6 +231,39 @@ export function Settings() {
                 <span>* Este valor es la base para el cálculo de tu patrimonio neto total.</span>
               </p>
             </div>
+          </div>
+        </Card>
+
+        {/* Telegram Integration Section */}
+        <Card className="space-y-6 border-blue-500/20 bg-blue-50/10">
+          <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+            <MessageCircle className="w-6 h-6 text-blue-500" />
+            <h3 className="text-xl font-bold text-charcoal-900"><span>Integración con Telegram</span></h3>
+          </div>
+
+          <div className="space-y-4">
+            <p className="text-sm text-slate-600">
+              Vincula tu cuenta con nuestro bot de Telegram para registrar movimientos y consultar saldos fácilmente.
+            </p>
+            
+            {linkCode ? (
+              <div className="p-4 rounded-xl bg-blue-50 border border-blue-100">
+                <p className="text-xs text-blue-600 font-bold uppercase mb-2">Tu Código de Vinculación</p>
+                <p className="text-3xl font-mono tracking-widest text-blue-900">{linkCode}</p>
+                <p className="text-sm text-blue-700 mt-3">
+                  Ve a Telegram, busca nuestro bot y envía: <br/>
+                  <code className="font-bold">/link {linkCode}</code>
+                </p>
+              </div>
+            ) : (
+              <Button 
+                onClick={generateTelegramCode} 
+                disabled={isGeneratingCode}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                {isGeneratingCode ? 'Generando...' : 'Generar Código de Vinculación'}
+              </Button>
+            )}
           </div>
         </Card>
 
