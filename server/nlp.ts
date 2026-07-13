@@ -7,7 +7,7 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 export interface NlpResult {
-  intent: 'record_transaction' | 'record_debt' | 'query' | 'unknown' | 'ambiguous';
+  intent: 'record_transaction' | 'record_debt' | 'record_loan' | 'record_investment' | 'record_saving' | 'pay_debt' | 'query' | 'unknown' | 'ambiguous';
   transaction?: {
     amount: number;
     category: string;
@@ -17,45 +17,69 @@ export interface NlpResult {
   debt?: {
     amount: number;
     creditor: string;
-    dueDate?: string; // Optional, bot can infer or default it
+    dueDate?: string;
     notes?: string;
+  };
+  loan?: {
+    borrower: string;
+    principal: number;
+    dueDate?: string;
+    interestRate?: number;
+  };
+  investment?: {
+    assetName: string;
+    initialInvestment: number;
+    pricePerUnit?: number;
+    quantity?: number;
+    description?: string;
+  };
+  saving?: {
+    name: string;
+    category: string;
+    amount: number;
   };
   missingInfoMessage?: string; // If ambiguous, what to ask the user
   queryResponse?: string; // If query, a response to send back, or instructions for the DB
 }
 
 export const NlpService = {
-  async processMessage(message: string, existingCategories: string[], balanceContext: any = null): Promise<NlpResult> {
+  async processMessage(message: string, existingCategories: string[], existingSavings: any[] = [], balanceContext: any = null): Promise<NlpResult> {
     const prompt = `
       You are a financial assistant bot. Analyze the user's message.
-      Existing categories the user uses: ${existingCategories.join(', ')}. Try to match these if relevant.
+      Existing transaction categories: ${existingCategories.join(', ')}.
+      Existing savings goals: ${JSON.stringify(existingSavings.map(s => ({ id: s.id, name: s.name, category: s.category }))) }.
       Current context if it's a query: ${balanceContext ? JSON.stringify(balanceContext) : 'None'}.
 
-      Determine the user's intent from these options: "record_transaction", "record_debt", "query", "ambiguous", "unknown".
-      - "record_transaction": The user clearly wants to record an income or expense.
-      - "record_debt": The user explicitly says they owe money to someone (e.g. "Le debo $100 a Juan", "Tengo una deuda de 50 con Maria").
-      - "query": The user is asking about their balance, spending, etc.
-      - "ambiguous": The user wants to record something but is missing critical info.
-      - "unknown": Unrelated greeting or chat.
+      Determine the user's intent from these options: "record_transaction", "record_debt", "record_loan", "record_investment", "record_saving", "pay_debt", "query", "ambiguous", "unknown".
+      
+      RULES FOR INTENTS:
+      - "record_transaction": Records an income or expense. Requires amount and category.
+      - "record_debt": The user owes money. Requires amount, creditor, and dueDate. (e.g. "Le debo $100 a Juan para el viernes")
+      - "record_loan": The user lent money to someone. Requires amount (principal), borrower, and dueDate. (e.g. "Le presté 50 a Pedro")
+      - "record_investment": The user invested money. Requires assetName, initialInvestment, pricePerUnit, quantity, and description. (e.g. "Invertí en Apple")
+      - "record_saving": The user saved money. Requires amount, name (meta name), and category. If adding to an existing goal, match the name/category. (e.g. "Ahorré 100 para mi viaje")
+      - "pay_debt": The user paid off an existing debt. Requires the creditor name. (e.g. "Ya pague la deuda a sistecredito")
+      - "query": Asking about balance or stats.
+      
+      CRITICAL RULE FOR AMBIGUOUS: 
+      If the user wants to record a loan but didn't provide a due date, set intent to "ambiguous" and ask for the due date in missingInfoMessage.
+      If the user wants to record a debt but didn't provide a due date, set intent to "ambiguous" and ask for the due date in missingInfoMessage.
+      If the user wants to record an investment but didn't provide ALL of (assetName, initialInvestment, pricePerUnit, quantity, description), set intent to "ambiguous" and ask for the missing ones in missingInfoMessage.
+      If the user wants to record a saving but didn't provide name or category (and it doesn't clearly match an existing one), set intent to "ambiguous" and ask for the name/category or if it belongs to an existing goal.
+      If the user wants to pay a debt but didn't mention the creditor, set intent to "ambiguous" and ask who they paid.
 
       Respond ONLY with a JSON object in this format (no markdown code blocks, just raw JSON):
       {
         "intent": "intent_type",
-        "transaction": {
-          "amount": number (positive),
-          "category": "string",
-          "type": "income" | "expense",
-          "notes": "string"
-        },
-        "debt": {
-          "amount": number (positive),
-          "creditor": "string (the person they owe)",
-          "dueDate": "string (ISO date, if mentioned, otherwise leave empty or null)",
-          "notes": "string"
-        },
-        "missingInfoMessage": "string (only if intent is ambiguous)",
+        "transaction": { "amount": 0, "category": "", "type": "income", "notes": "" },
+        "debt": { "amount": 0, "creditor": "", "dueDate": "", "notes": "" },
+        "loan": { "principal": 0, "borrower": "", "dueDate": "ISO Date", "interestRate": 0 },
+        "investment": { "assetName": "", "initialInvestment": 0, "pricePerUnit": 0, "quantity": 0, "description": "" },
+        "saving": { "amount": 0, "name": "", "category": "" },
+        "missingInfoMessage": "Message asking for the REQUIRED missing fields (only if intent is ambiguous)",
         "queryResponse": "string (only if intent is query - answer their question based on context)"
       }
+      (Omit the properties that are not relevant to the chosen intent)
 
       Message: "${message}"
     `;

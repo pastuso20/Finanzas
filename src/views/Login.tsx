@@ -5,8 +5,12 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Lock, Mail, ArrowRight, Sparkles, Shield, Zap } from 'lucide-react';
 
 export default function Login() {
+  const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [userName, setUserName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [initialBalance, setInitialBalance] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const { setUserId } = useFinanceStore();
@@ -56,6 +60,13 @@ export default function Login() {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            user_name: userName || 'Usuario',
+            phone: phone || null,
+            initial_balance: initialBalance ? parseFloat(initialBalance) : 0
+          }
+        }
       });
 
       if (error) {
@@ -126,9 +137,13 @@ export default function Login() {
       {/* Centered Login Card */}
       <motion.div
         initial={{ opacity: 0, y: 30, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
+        animate={{ 
+          opacity: 1, 
+          y: 0, 
+          scale: 1,
+        }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        className="w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden relative z-10"
+        className="w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden relative z-10 transition-all duration-500 ease-in-out"
       >
         <div className="flex flex-col lg:flex-row">
           {/* Left Welcome Section */}
@@ -150,25 +165,29 @@ export default function Login() {
             </motion.div>
             
             <motion.h1
+              key={isLogin ? 'title-login' : 'title-signup'}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.2 }}
               className="text-3xl lg:text-4xl font-bold mb-3"
             >
-              ¡Bienvenido de nuevo!
+              {isLogin ? '¡Bienvenido de nuevo!' : 'Únete a Prestige Finance'}
             </motion.h1>
             <motion.p
+              key={isLogin ? 'desc-login' : 'desc-signup'}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.3 }}
               className="text-emerald-100 text-base lg:text-lg mb-6 leading-relaxed"
             >
-              Puedes iniciar sesión para acceder con tu cuenta existente.
+              {isLogin 
+                ? 'Puedes iniciar sesión para acceder con tu cuenta existente.'
+                : 'Crea tu cuenta ahora para tomar el control de tus finanzas personales.'}
             </motion.p>
           </div>
 
           {/* Right Form Section */}
-          <div className="lg:w-1/2 p-8 lg:p-12 bg-white relative">
+          <div className="lg:w-1/2 p-6 lg:p-10 bg-white relative">
             {/* Watermark Logo */}
             <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none">
               <img src="/logo-login.png" alt="Watermark" className="w-48 h-48 object-contain" />
@@ -176,20 +195,22 @@ export default function Login() {
             
             <div className="relative z-10">
             <motion.h2
+              key={isLogin ? 'form-title-login' : 'form-title-signup'}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3, delay: 0.2 }}
               className="text-2xl font-bold text-gray-900 mb-2"
             >
-              Iniciar Sesión
+              {isLogin ? 'Iniciar Sesión' : 'Crear Cuenta'}
             </motion.h2>
             <motion.p
+              key={isLogin ? 'form-desc-login' : 'form-desc-signup'}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.3, delay: 0.25 }}
               className="text-gray-600 mb-6"
             >
-              Accede a tu cuenta
+              {isLogin ? 'Accede a tu cuenta' : 'Completa tus datos para registrarte'}
             </motion.p>
 
             <AnimatePresence mode="wait">
@@ -205,69 +226,133 @@ export default function Login() {
               )}
             </AnimatePresence>
 
-            <form onSubmit={handleLogin} className="space-y-4">
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3, delay: 0.3 }}
-              >
-                <label className="block text-gray-700 font-semibold mb-2 text-sm">
-                  Usuario o email
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <motion.input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    whileFocus={{ scale: 1.01 }}
-                    className="w-full pl-12 pr-5 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none transition-all text-gray-900 placeholder-gray-400"
-                    placeholder="tu@email.com"
-                    required
-                  />
-                </div>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3, delay: 0.35 }}
-              >
-                <label className="block text-gray-700 font-semibold mb-2 text-sm">
-                  Contraseña
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <motion.input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    whileFocus={{ scale: 1.01 }}
-                    className="w-full pl-12 pr-5 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focusOutline-none transition-all text-gray-900 placeholder-gray-400"
-                    placeholder="••••••••"
-                    required
-                  />
-                </div>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3, delay: 0.4 }}
-                className="flex justify-between items-center"
-              >
-                <label className="flex items-center gap-2 text-sm text-gray-600">
-                  <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500" />
-                  Recordarme
-                </label>
-                <motion.a
-                  href="#"
-                  whileHover={{ scale: 1.05 }}
-                  className="text-emerald-600 hover:text-emerald-700 font-medium text-sm transition-colors"
+            <div className={`transition-all duration-500 ease-in-out ${isLogin ? '' : ''}`}>
+              <form onSubmit={isLogin ? handleLogin : (e) => { e.preventDefault(); handleSignUp(); }} className="space-y-4">
+              {!isLogin && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0, overflow: 'hidden' }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  transition={{ duration: 0.3 }}
+                  className="grid grid-cols-1 md:grid-cols-2 gap-4"
                 >
-                  ¿Olvidaste tu contraseña?
-                </motion.a>
-              </motion.div>
+                  <div className="col-span-1">
+                    <label className="block text-gray-700 font-semibold mb-2 text-sm">
+                      Nombre de Usuario
+                    </label>
+                    <div className="relative mb-2">
+                      <motion.input
+                        type="text"
+                        value={userName}
+                        onChange={(e) => setUserName(e.target.value)}
+                        whileFocus={{ scale: 1.01 }}
+                        className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none transition-all text-gray-900 placeholder-gray-400"
+                        placeholder="Tu nombre o alias"
+                        required={!isLogin}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="col-span-1">
+                    <label className="block text-gray-700 font-semibold mb-2 text-sm">
+                      Teléfono
+                    </label>
+                    <div className="relative mb-2">
+                      <motion.input
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        whileFocus={{ scale: 1.01 }}
+                        className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none transition-all text-gray-900 placeholder-gray-400"
+                        placeholder="Tu número de teléfono"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="col-span-1 md:col-span-2">
+                    <label className="block text-gray-700 font-semibold mb-2 text-sm">
+                      Monto de Dinero Inicial (Opcional)
+                    </label>
+                    <div className="relative mb-2">
+                      <motion.input
+                        type="number"
+                        value={initialBalance}
+                        onChange={(e) => setInitialBalance(e.target.value)}
+                        whileFocus={{ scale: 1.01 }}
+                        className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none transition-all text-gray-900 placeholder-gray-400"
+                        placeholder="0"
+                        min="0"
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              <div className={`grid grid-cols-1 ${isLogin ? '' : 'md:grid-cols-2'} gap-4`}>
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: 0.3 }}
+                >
+                  <label className="block text-gray-700 font-semibold mb-2 text-sm">
+                    Usuario o email
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <motion.input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      whileFocus={{ scale: 1.01 }}
+                      className="w-full pl-12 pr-5 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none transition-all text-gray-900 placeholder-gray-400"
+                      placeholder="tu@email.com"
+                      required
+                    />
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: 0.35 }}
+                >
+                  <label className="block text-gray-700 font-semibold mb-2 text-sm">
+                    Contraseña
+                  </label>
+                  <div className="relative">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <motion.input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      whileFocus={{ scale: 1.01 }}
+                      className="w-full pl-12 pr-5 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none transition-all text-gray-900 placeholder-gray-400"
+                      placeholder="••••••••"
+                      required
+                    />
+                  </div>
+                </motion.div>
+              </div>
+
+              {isLogin && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3, delay: 0.4 }}
+                  className="flex justify-between items-center"
+                >
+                  <label className="flex items-center gap-2 text-sm text-gray-600">
+                    <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500" />
+                    Recordarme
+                  </label>
+                  <motion.a
+                    href="#"
+                    whileHover={{ scale: 1.05 }}
+                    className="text-emerald-600 hover:text-emerald-700 font-medium text-sm transition-colors"
+                  >
+                    ¿Olvidaste tu contraseña?
+                  </motion.a>
+                </motion.div>
+              )}
 
               <motion.button
                 initial={{ opacity: 0, y: 20 }}
@@ -279,9 +364,10 @@ export default function Login() {
                 whileTap={{ scale: 0.98 }}
                 className="w-full bg-emerald-600 text-white font-bold py-3 rounded-xl hover:bg-emerald-700 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'Cargando...' : 'Iniciar Sesión'}
+                {loading ? 'Cargando...' : (isLogin ? 'Iniciar Sesión' : 'Crear Cuenta')}
               </motion.button>
             </form>
+            </div>
 
             <motion.div
               initial={{ opacity: 0 }}
@@ -290,15 +376,19 @@ export default function Login() {
               className="mt-6 text-center"
             >
               <p className="text-gray-600">
-                ¿No tienes una cuenta?{' '}
+                {isLogin ? '¿No tienes una cuenta? ' : '¿Ya tienes una cuenta? '}
                 <motion.button
-                  onClick={handleSignUp}
+                  type="button"
+                  onClick={() => {
+                    setIsLogin(!isLogin);
+                    setError('');
+                  }}
                   disabled={loading}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="text-emerald-600 hover:text-emerald-700 font-bold transition-colors"
                 >
-                  Crear cuenta
+                  {isLogin ? 'Crear cuenta' : 'Iniciar Sesión'}
                 </motion.button>
               </p>
             </motion.div>

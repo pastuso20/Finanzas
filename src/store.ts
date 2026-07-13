@@ -108,9 +108,15 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
       } else if (!profileError) {
         // Auto-create profile if it doesn't exist and there was no fetch error
         console.log('Profile not found, creating one for user:', currentUserId);
+        const meta = user.user_metadata || {};
+        
         const { data: newProfile, error: createError } = await supabase
           .from('profile')
-          .upsert({ id: currentUserId, user_name: 'David Aite', initial_balance: 0 })
+          .upsert({ 
+             id: currentUserId, 
+             user_name: meta.user_name || 'User', 
+             initial_balance: meta.initial_balance || 0
+          })
           .select()
           .maybeSingle();
 

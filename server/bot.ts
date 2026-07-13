@@ -53,14 +53,23 @@ export function initBot() {
       return bot.sendMessage(chatId, 'Tu cuenta no está vinculada. Por favor, usa el comando `/link TUCÓDIGO` con el código generado en la web.', { parse_mode: 'Markdown' });
     }
 
+    // Handle simple greetings directly
+    const lowerText = text.toLowerCase().trim();
+    const greetings = ['hola', 'hola bot', 'saludos', 'buenas', 'buenos dias', 'buenos días', 'buenas tardes', 'buenas noches', 'hello', 'hi'];
+    if (greetings.includes(lowerText)) {
+      const name = user.user_name || 'amigo';
+      return bot.sendMessage(chatId, `¡Hola, ${name}! 👋\n\n¿En qué te puedo ayudar hoy con tus finanzas?`);
+    }
+
     // Indicate processing
     bot.sendChatAction(chatId, 'typing');
 
-    // Get user categories for context
+    // Get user categories and savings for context
     const categories = await FinanceService.getUserCategories(user.id);
+    const savings = await FinanceService.getUserSavings(user.id);
 
     // Process with NLP
-    const nlpResult = await NlpService.processMessage(text, categories);
+    const nlpResult = await NlpService.processMessage(text, categories, savings);
 
     if (nlpResult.intent === 'record_transaction' && nlpResult.transaction) {
       try {
@@ -79,20 +88,77 @@ export function initBot() {
       }
     } else if (nlpResult.intent === 'record_debt' && nlpResult.debt) {
       try {
-        const dueDate = nlpResult.debt.dueDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(); // Default 30 days
         await FinanceService.addDebt({
           userId: user.id,
           creditor: nlpResult.debt.creditor,
           amount: nlpResult.debt.amount,
-          dueDate: dueDate,
+          dueDate: nlpResult.debt.dueDate as string,
           notes: nlpResult.debt.notes
         });
 
-        const summary = `✅ *Deuda Registrada*\n\nAcreedor: ${nlpResult.debt.creditor}\nMonto: $${nlpResult.debt.amount}\n${nlpResult.debt.notes ? `Notas: ${nlpResult.debt.notes}` : ''}`;
+        const summary = `✅ *Deuda Registrada*\n\nAcreedor: ${nlpResult.debt.creditor}\nMonto: $${nlpResult.debt.amount}\nFecha Límite: ${new Date(nlpResult.debt.dueDate as string).toLocaleDateString()}\n${nlpResult.debt.notes ? `Notas: ${nlpResult.debt.notes}` : ''}`;
         
         bot.sendMessage(chatId, summary, { parse_mode: 'Markdown' });
       } catch (error) {
         bot.sendMessage(chatId, '❌ Ocurrió un error al intentar guardar la deuda.');
+      }
+    } else if (nlpResult.intent === 'record_loan' && nlpResult.loan) {
+      try {
+        await FinanceService.addLoan({
+          userId: user.id,
+          borrower: nlpResult.loan.borrower,
+          principal: nlpResult.loan.principal,
+          dueDate: nlpResult.loan.dueDate as string,
+          interestRate: nlpResult.loan.interestRate || 0
+        });
+
+        const summary = `✅ *Préstamo Registrado*\n\nPrestatario: ${nlpResult.loan.borrower}\nMonto: $${nlpResult.loan.principal}\nFecha Límite: ${new Date(nlpResult.loan.dueDate as string).toLocaleDateString()}`;
+        bot.sendMessage(chatId, summary, { parse_mode: 'Markdown' });
+      } catch (error) {
+        bot.sendMessage(chatId, '❌ Ocurrió un error al intentar guardar el préstamo.');
+      }
+    } else if (nlpResult.intent === 'record_investment' && nlpResult.investment) {
+      try {
+        await FinanceService.addInvestment({
+          userId: user.id,
+          assetName: nlpResult.investment.assetName,
+          initialInvestment: nlpResult.investment.initialInvestment,
+          pricePerUnit: nlpResult.investment.pricePerUnit,
+          quantity: nlpResult.investment.quantity,
+          description: nlpResult.investment.description
+        });
+
+        const summary = `✅ *Inversión Registrada*\n\nActivo: ${nlpResult.investment.assetName}\nMonto Inicial: $${nlpResult.investment.initialInvestment}`;
+        bot.sendMessage(chatId, summary, { parse_mode: 'Markdown' });
+      } catch (error) {
+        bot.sendMessage(chatId, '❌ Ocurrió un error al intentar guardar la inversión.');
+      }
+    } else if (nlpResult.intent === 'record_saving' && nlpResult.saving) {
+      try {
+        // Check if there is an existing saving with the exact name/category
+        const existing = savings.find(s => s.name.toLowerCase() === nlpResult.saving?.name.toLowerCase());
+        
+        if (existing) {
+          await FinanceService.addAmountToSaving(existing.id, nlpResult.saving.amount);
+          bot.sendMessage(chatId, `✅ *Ahorro Actualizado*\n\nAgregaste $${nlpResult.saving.amount} a tu meta: ${existing.name}`, { parse_mode: 'Markdown' });
+        } else {
+          await FinanceService.addSaving({
+            userId: user.id,
+            name: nlpResult.saving.name,
+            category: nlpResult.saving.category,
+            amount: nlpResult.saving.amount
+          });
+          bot.sendMessage(chatId, `✅ *Nuevo Ahorro Registrado*\n\nMeta: ${nlpResult.saving.name}\nCategoría: ${nlpResult.saving.category}\nMonto Inicial: $${nlpResult.saving.amount}`, { parse_mode: 'Markdown' });
+        }
+      } catch (error) {
+        bot.sendMessage(chatId, '❌ Ocurrió un error al intentar guardar el ahorro.');
+      }
+    } else if (nlpResult.intent === 'pay_debt' && nlpResult.debt) {
+      try {
+        const result = await FinanceService.markDebtAsPaid(user.id, nlpResult.debt.creditor);
+        bot.sendMessage(chatId, result.message, { parse_mode: 'Markdown' });
+      } catch (error) {
+        bot.sendMessage(chatId, '❌ Ocurrió un error al procesar el pago de la deuda.');
       }
     } else if (nlpResult.intent === 'query') {
       const summaryContext = await FinanceService.getTransactionsSummary(user.id);

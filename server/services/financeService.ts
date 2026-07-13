@@ -22,6 +22,30 @@ export interface DebtData {
   notes?: string;
 }
 
+export interface LoanData {
+  userId: string;
+  borrower: string;
+  principal: number;
+  dueDate: string; // Required based on user feedback
+  interestRate?: number;
+}
+
+export interface InvestmentData {
+  userId: string;
+  assetName: string; // Required
+  initialInvestment: number; // Required
+  description?: string;
+  pricePerUnit?: number;
+  quantity?: number;
+}
+
+export interface SavingData {
+  userId: string;
+  name: string; // Required
+  category: string; // Required
+  amount: number; // The amount being added
+}
+
 export const FinanceService = {
   /**
    * Retrieves a user by their Telegram Chat ID
@@ -131,6 +155,156 @@ export const FinanceService = {
       throw error;
     }
     return true;
+  },
+
+  /**
+   * Marks a debt as paid and creates an expense transaction
+   */
+  async markDebtAsPaid(userId: string, creditorName: string) {
+    // 1. Find the pending debt
+    const { data: debts, error: findError } = await supabase
+      .from('debts')
+      .select('id, amount, creditor')
+      .eq('user_id', userId)
+      .eq('status', 'pending')
+      .ilike('creditor', `%${creditorName}%`)
+      .limit(1);
+
+    if (findError || !debts || debts.length === 0) {
+      return { success: false, message: 'No encontré ninguna deuda pendiente con ese acreedor.' };
+    }
+
+    const debt = debts[0];
+
+    // 2. Update status to paid
+    const { error: updateError } = await supabase
+      .from('debts')
+      .update({ status: 'paid' })
+      .eq('id', debt.id);
+
+    if (updateError) {
+      console.error('Error updating debt status:', updateError);
+      return { success: false, message: 'Hubo un error al actualizar la deuda.' };
+    }
+
+    // 3. Create expense transaction
+    await this.addTransaction({
+      userId,
+      type: 'expense',
+      amount: debt.amount,
+      category: 'Pago Deuda',
+      notes: `Pago de deuda a ${debt.creditor}`
+    });
+
+    return { 
+      success: true, 
+      message: `✅ *Deuda Pagada*\n\nSe marcó como pagada tu deuda con ${debt.creditor} por $${debt.amount} y se registró el gasto correspondiente.` 
+    };
+  },
+
+  /**
+   * Adds a new loan for the user
+   */
+  async addLoan(data: LoanData) {
+    const { error } = await supabase
+      .from('loans')
+      .insert({
+        user_id: data.userId,
+        borrower: data.borrower,
+        principal: data.principal,
+        due_date: data.dueDate,
+        interest_rate: data.interestRate || 0
+      });
+
+    if (error) {
+      console.error('Error adding loan:', error);
+      throw error;
+    }
+    return true;
+  },
+
+  /**
+   * Adds a new investment for the user
+   */
+  async addInvestment(data: InvestmentData) {
+    const { error } = await supabase
+      .from('investments')
+      .insert({
+        user_id: data.userId,
+        asset_name: data.assetName,
+        initial_investment: data.initialInvestment,
+        current_value: data.initialInvestment, // defaults to initial
+        description: data.description,
+        product_price_per_unit: data.pricePerUnit,
+        total_product_quantity: data.quantity || 1
+      });
+
+    if (error) {
+      console.error('Error adding investment:', error);
+      throw error;
+    }
+    return true;
+  },
+
+  /**
+   * Adds a new saving goal for the user
+   */
+  async addSaving(data: SavingData) {
+    const { error } = await supabase
+      .from('savings')
+      .insert({
+        user_id: data.userId,
+        name: data.name,
+        category: data.category,
+        current_amount: data.amount,
+        goal_amount: 0 // Optional, we can just leave it 0 if not specified
+      });
+
+    if (error) {
+      console.error('Error adding saving:', error);
+      throw error;
+    }
+    return true;
+  },
+
+  /**
+   * Updates an existing saving goal (adds amount to current)
+   */
+  async addAmountToSaving(savingId: string, amountToAdd: number) {
+    // First get current
+    const { data: current, error: getError } = await supabase
+      .from('savings')
+      .select('current_amount')
+      .eq('id', savingId)
+      .single();
+
+    if (getError || !current) throw getError || new Error('Saving not found');
+
+    const newAmount = Number(current.current_amount) + amountToAdd;
+    
+    const { error } = await supabase
+      .from('savings')
+      .update({ current_amount: newAmount })
+      .eq('id', savingId);
+
+    if (error) throw error;
+    return true;
+  },
+
+  /**
+   * Gets user savings (to use as context for NLP)
+   */
+  async getUserSavings(userId: string) {
+    const { data, error } = await supabase
+      .from('savings')
+      .select('id, name, category, current_amount')
+      .eq('user_id', userId);
+
+    if (error) {
+      console.error('Error fetching savings:', error);
+      return [];
+    }
+    return data;
   },
 
   /**
