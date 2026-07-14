@@ -11,14 +11,17 @@ if (!token) {
   throw new Error('TELEGRAM_BOT_TOKEN is missing');
 }
 
-// Create a bot that uses 'polling' to fetch new updates
-export const bot = new TelegramBot(token, { polling: true });
+// Check if we are running in a serverless environment (like Vercel)
+const isProduction = process.env.VERCEL === '1' || process.env.NODE_ENV === 'production';
+
+// Use polling only in local development. In production, we'll use webhooks.
+export const bot = new TelegramBot(token, isProduction ? {} : { polling: true });
 
 // State for conversation contexts if needed (e.g. pending ambiguous transactions)
 const userStates = new Map<number, any>();
 
 export function initBot() {
-  console.log('Telegram Bot initialized via long polling...');
+  console.log(`Telegram Bot initialized via ${isProduction ? 'webhooks' : 'long polling'}...`);
 
   // Match /start command
   bot.onText(/\/start/, (msg) => {
