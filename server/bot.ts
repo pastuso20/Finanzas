@@ -1,8 +1,8 @@
 import TelegramBot from 'node-telegram-bot-api';
 import dotenv from 'dotenv';
 import path from 'path';
-import { FinanceService } from './services/financeService';
-import { NlpService } from './nlp';
+import { FinanceService } from './services/financeService.js';
+import { NlpService } from './nlp.js';
 
 dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 

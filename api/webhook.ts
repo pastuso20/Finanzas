@@ -1,4 +1,4 @@
-import { processTelegramUpdate } from '../server/bot';
+import { processTelegramUpdate } from '../server/bot.js';
 
 export default async function handler(req: any, res: any) {
   // Aseguramos que CORS está habilitado para la ruta

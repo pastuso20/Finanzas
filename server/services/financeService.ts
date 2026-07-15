@@ -1,4 +1,4 @@
-import { supabase } from '../supabase';
+import { supabase } from '../supabase.js';
 
 /**
  * Service to handle database operations for the Telegram Bot.
