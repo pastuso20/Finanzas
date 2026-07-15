@@ -1,7 +1,4 @@
-import { bot, initBot } from '../server/bot';
-
-// Aseguramos de que el bot y sus eventos se inicialicen solo una vez
-let isInitialized = false;
+import { processTelegramUpdate } from '../server/bot';
 
 export default async function handler(req: any, res: any) {
   // Aseguramos que CORS está habilitado para la ruta
@@ -15,15 +12,10 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
-  if (!isInitialized) {
-    initBot();
-    isInitialized = true;
-  }
-
   try {
     if (req.method === 'POST') {
-      // Pasamos el cuerpo del mensaje de Telegram a nuestro bot
-      bot.processUpdate(req.body);
+      // Pasamos el cuerpo del mensaje de Telegram a nuestro procesador asíncrono y ESPERAMOS a que termine
+      await processTelegramUpdate(req.body);
       res.status(200).json({ status: 'ok' });
     } else {
       // Si hacen un GET, simplemente respondemos para verificar que el endpoint existe
