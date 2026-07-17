@@ -71,6 +71,9 @@ export const NlpService = {
       NUMBER FORMATTING RULE: 
       DO NOT use commas or dots as thousands separators in the amount fields. For example, if the user says "10.000", output 10000. If they say "1,500.50", output 1500.50.
 
+      DATE FORMATTING RULE:
+      Any date field (like dueDate) MUST be returned in valid ISO 8601 format (YYYY-MM-DD). If the user says "mañana" or "el viernes", calculate the exact date and return it as YYYY-MM-DD. Assume today's date is: ${new Date().toISOString().split('T')[0]}.
+
       Respond ONLY with a JSON object in this format (no markdown code blocks, just raw JSON):
       {
         "intent": "intent_type",

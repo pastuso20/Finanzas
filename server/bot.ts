@@ -74,6 +74,10 @@ export async function processTelegramUpdate(update: any) {
   const nlpResult = await NlpService.processMessage(text, categories, savings);
 
   if (nlpResult.intent === 'record_transaction' && nlpResult.transaction) {
+    if (!nlpResult.transaction.amount || !nlpResult.transaction.category) {
+      await bot.sendMessage(chatId, 'Me falta información para registrar este movimiento. Por favor, indícame el monto y la categoría (ejemplo: "Gasté $50 en comida" o "Ingresó $1000 de sueldo").');
+      return;
+    }
     try {
       await FinanceService.addTransaction({
         userId: user.id,
@@ -89,6 +93,10 @@ export async function processTelegramUpdate(update: any) {
       await bot.sendMessage(chatId, '❌ Ocurrió un error al intentar guardar el movimiento.');
     }
   } else if (nlpResult.intent === 'record_debt' && nlpResult.debt) {
+    if (!nlpResult.debt.dueDate) {
+      await bot.sendMessage(chatId, 'Por favor, indícame la fecha límite para pagar esta deuda (ejemplo: "para el 30 de julio" o "para el viernes").');
+      return;
+    }
     try {
       await FinanceService.addDebt({
         userId: user.id,
@@ -105,6 +113,10 @@ export async function processTelegramUpdate(update: any) {
       await bot.sendMessage(chatId, '❌ Ocurrió un error al intentar guardar la deuda.');
     }
   } else if (nlpResult.intent === 'record_loan' && nlpResult.loan) {
+    if (!nlpResult.loan.dueDate) {
+      await bot.sendMessage(chatId, 'Por favor, indícame la fecha límite para que te paguen este préstamo (ejemplo: "para el 30 de julio" o "para el viernes").');
+      return;
+    }
     try {
       await FinanceService.addLoan({
         userId: user.id,
@@ -120,6 +132,10 @@ export async function processTelegramUpdate(update: any) {
       await bot.sendMessage(chatId, '❌ Ocurrió un error al intentar guardar el préstamo.');
     }
   } else if (nlpResult.intent === 'record_investment' && nlpResult.investment) {
+    if (!nlpResult.investment.assetName || !nlpResult.investment.initialInvestment) {
+      await bot.sendMessage(chatId, 'Para registrar la inversión necesito el nombre del activo y el monto inicial (ejemplo: "Invertí $500 en acciones de Apple").');
+      return;
+    }
     try {
       await FinanceService.addInvestment({
         userId: user.id,
@@ -136,6 +152,10 @@ export async function processTelegramUpdate(update: any) {
       await bot.sendMessage(chatId, '❌ Ocurrió un error al intentar guardar la inversión.');
     }
   } else if (nlpResult.intent === 'record_saving' && nlpResult.saving) {
+    if (!nlpResult.saving.name || !nlpResult.saving.amount) {
+      await bot.sendMessage(chatId, 'Para registrar tu ahorro necesito saber la cantidad y el nombre de la meta (ejemplo: "Ahorré $100 para mi viaje").');
+      return;
+    }
     try {
       // Check if there is an existing saving with the exact name/category
       const existing = savings.find(s => s.name.toLowerCase() === nlpResult.saving?.name.toLowerCase());
@@ -156,6 +176,10 @@ export async function processTelegramUpdate(update: any) {
       await bot.sendMessage(chatId, '❌ Ocurrió un error al intentar guardar el ahorro.');
     }
   } else if (nlpResult.intent === 'pay_debt' && nlpResult.debt) {
+    if (!nlpResult.debt.creditor) {
+      await bot.sendMessage(chatId, 'Por favor indícame a quién le pagaste la deuda (ejemplo: "Ya pagué la deuda a Juan").');
+      return;
+    }
     try {
       const result = await FinanceService.markDebtAsPaid(user.id, nlpResult.debt.creditor);
       await bot.sendMessage(chatId, result.message, { parse_mode: 'Markdown' });
