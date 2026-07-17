@@ -67,11 +67,14 @@ export const NlpService = {
       If the user wants to record an investment but didn't provide ALL of (assetName, initialInvestment, pricePerUnit, quantity, description), set intent to "ambiguous" and ask for the missing ones in missingInfoMessage.
       If the user wants to record a saving but didn't provide name or category (and it doesn't clearly match an existing one), set intent to "ambiguous" and ask for the name/category or if it belongs to an existing goal.
       If the user wants to pay a debt but didn't mention the creditor, set intent to "ambiguous" and ask who they paid.
+      
+      NUMBER FORMATTING RULE: 
+      DO NOT use commas or dots as thousands separators in the amount fields. For example, if the user says "10.000", output 10000. If they say "1,500.50", output 1500.50.
 
       Respond ONLY with a JSON object in this format (no markdown code blocks, just raw JSON):
       {
         "intent": "intent_type",
-        "transaction": { "amount": 0, "category": "", "type": "income", "notes": "" },
+        "transaction": { "amount": 0, "category": "", "type": "income o expense", "notes": "" },
         "debt": { "amount": 0, "creditor": "", "dueDate": "", "notes": "" },
         "loan": { "principal": 0, "borrower": "", "dueDate": "ISO Date", "interestRate": 0 },
         "investment": { "assetName": "", "initialInvestment": 0, "pricePerUnit": 0, "quantity": 0, "description": "" },
