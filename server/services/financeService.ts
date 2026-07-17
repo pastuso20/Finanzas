@@ -83,7 +83,13 @@ export const FinanceService = {
       return { success: false, message: 'Código inválido o expirado.' };
     }
 
-    // 2. Update user with chat ID and clear link code
+    // 2. Unlink any previous account that has this chat ID to prevent unique constraint errors
+    await supabase
+      .from('profile')
+      .update({ telegram_chat_id: null })
+      .eq('telegram_chat_id', chatId.toString());
+
+    // 3. Update the new user with chat ID and clear link code
     const { error: updateError } = await supabase
       .from('profile')
       .update({
