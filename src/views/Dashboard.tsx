@@ -2,7 +2,8 @@ import React, { useState, useMemo } from 'react';
 import { useFinanceStore } from '../store';
 import { Card, cn } from '../components/ui';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
-import { TrendingUp, TrendingDown, AlertCircle, DollarSign, Activity, Filter, PieChart as PieChartIcon, HandCoins } from 'lucide-react';
+import { TrendingUp, TrendingDown, AlertCircle, DollarSign, Activity, Filter, PieChart as PieChartIcon, HandCoins, MessageCircle, Send } from 'lucide-react';
+import { CardSpotlight } from '../components/ui/card-spotlight';
 import { format, isBefore, addDays } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { formatCurrency, safeDate } from '../utils';
@@ -38,6 +39,7 @@ export function Dashboard() {
   const investments = useFinanceStore(state => state.investments);
   const debts = useFinanceStore(state => state.debts);
   const savings = useFinanceStore(state => state.savings);
+  const userName = useFinanceStore(state => state.userName);
 
   const snapshot = {
     initialBalance,
@@ -137,16 +139,48 @@ export function Dashboard() {
     <div className="space-y-6 md:space-y-10 animate-in fade-in duration-500 pb-20 md:pb-0" translate="no">
       {/* Refined Header - Expert UI */}
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 md:gap-0">
-        <div className="flex flex-col">
+        <div className="flex flex-col w-full md:max-w-md lg:max-w-xl">
           <h2 className="text-3xl md:text-5xl font-bold text-emerald-900 tracking-tight font-serif"><span>Resumen General</span></h2>
           <p className="text-slate-400 text-sm md:text-base mt-2"><span>Tu centro de comando financiero</span></p>
+
+          {/* Smart Contextual Banner */}
+          <CardSpotlight 
+            className="w-full mt-6 rounded-[1.5rem] shadow-[0_8px_30px_rgb(34,158,217,0.15)] border border-[#2AABEE]/20 p-6 flex flex-col xl:flex-row items-center justify-between text-slate-800 overflow-hidden relative cursor-pointer bg-white"
+            color="#f0f9ff"
+          >
+            <div className="absolute -right-10 -top-10 w-32 h-32 bg-[#2AABEE]/5 rounded-full blur-2xl pointer-events-none" />
+            <div className="absolute -left-10 -bottom-10 w-24 h-24 bg-[#2AABEE]/5 rounded-full blur-2xl pointer-events-none" />
+            <div className="relative z-10 flex-1 pr-4 mb-4 xl:mb-0">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="bg-[#2AABEE]/10 p-1.5 rounded-lg">
+                  <Send className="w-4 h-4 text-[#229ED9]" />
+                </div>
+                <h3 className="text-lg font-bold tracking-tight text-slate-900">Registro Rápido</h3>
+              </div>
+              <p className="text-slate-600 text-xs sm:text-sm leading-relaxed mt-1">
+                ¿Quieres registrar gastos en 3 segundos? Vincula nuestro bot de Telegram.
+              </p>
+            </div>
+            <div className="relative z-10 w-full xl:w-auto shrink-0">
+              <button 
+                onClick={() => window.dispatchEvent(new CustomEvent('navigate', { detail: 'settings' }))}
+                className="flex items-center justify-center w-full xl:w-auto px-5 py-2.5 bg-[#229ED9] text-white text-sm font-bold rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all text-center"
+              >
+                Vincular Bot
+              </button>
+            </div>
+          </CardSpotlight>
         </div>
 
         {/* Patrimonio Neto - Mobile Premium UI */}
-        <div className="w-full md:w-auto bg-white rounded-[2rem] md:rounded-[2.5rem] border border-slate-100 shadow-xl shadow-emerald-900/5 p-5 md:p-10 flex flex-col md:items-end relative overflow-hidden group notranslate">
+        <div className="w-full md:w-auto bg-white rounded-[2rem] md:rounded-[2.5rem] border border-slate-100 shadow-xl shadow-emerald-900/5 p-6 md:p-10 flex flex-col md:items-end justify-center relative overflow-hidden group notranslate min-h-[220px] md:min-h-[240px]">
           <div className="absolute top-0 right-0 w-24 h-24 md:w-32 md:h-32 bg-emerald-50/50 rounded-full -mr-12 -mt-12 md:-mr-16 md:-mt-16 transition-transform group-hover:scale-110" />
-          <p className="text-[10px] md:text-xs text-slate-400 font-bold uppercase tracking-[0.3em] mb-2 relative"><span>PATRIMONIO NETO TOTAL</span></p>
-          <div className="flex flex-col md:items-end relative">
+          
+          <div className="flex flex-col md:items-end relative w-full h-full justify-center">
+            <p className="text-sm md:text-base text-slate-500 font-medium mb-3 md:mb-4">
+              Hola, <span className="font-bold text-emerald-800">{userName || 'Usuario'}</span> 👋
+            </p>
+            <p className="text-[10px] md:text-xs text-slate-400 font-bold uppercase tracking-[0.3em] mb-2 relative"><span>PATRIMONIO NETO TOTAL</span></p>
             <h3 className="text-3xl md:text-5xl font-bold text-emerald-900 font-mono tracking-tighter">
               <span>{formatCurrency(netWorth)}</span>
             </h3>
@@ -200,6 +234,8 @@ export function Dashboard() {
           </div>
         </Card>
       </div>
+
+
 
       {/* Main Chart Area */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">

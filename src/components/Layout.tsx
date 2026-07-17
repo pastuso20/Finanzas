@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useFinanceStore } from '../store';
 import { supabase } from '../supabase';
 import { LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -16,6 +16,10 @@ export function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
   const userName = useFinanceStore(state => state.userName);
   const setUserId = useFinanceStore(state => state.setUserId);
   const SettingsIcon = SETTINGS_NAV.icon;
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [activeTab]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();

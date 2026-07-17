@@ -18,6 +18,15 @@ export default function App() {
     fetchData();
   }, [fetchData]);
 
+  useEffect(() => {
+    const handleNavigate = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      handleTabChange(customEvent.detail);
+    };
+    window.addEventListener('navigate', handleNavigate);
+    return () => window.removeEventListener('navigate', handleNavigate);
+  }, []);
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gold-500 flex items-center justify-center">

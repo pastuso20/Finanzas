@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useFinanceStore } from '../store';
 import { Card, Button, Input, Label, cn } from '../components/ui';
-import { Plus, Minus, PiggyBank, Target, TrendingUp } from 'lucide-react';
+import { Plus, Minus, PiggyBank, Target, TrendingUp, Hammer } from 'lucide-react';
 import Decimal from 'decimal.js';
 import { formatCurrency } from '../utils';
 
@@ -197,28 +197,57 @@ export function Savings() {
                         )}
                       </div>
 
-                      <Input
-                        type="number"
-                        step="1"
-                        placeholder="Actualizar ($)"
-                        className="w-full sm:w-36 h-10 text-sm font-bold"
-                        onBlur={(e) => {
-                          if (e.target.value && e.target.value !== saving.currentAmount) {
-                            updateSavingAmount(saving.id, e.target.value);
-                            e.target.value = '';
-                          }
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            const target = e.target as HTMLInputElement;
-                            if (target.value && target.value !== saving.currentAmount) {
-                              updateSavingAmount(saving.id, target.value);
-                              target.value = '';
-                              target.blur();
+                      {isComplete ? (
+                        <Button
+                          className="h-10 px-4 bg-amber-500 hover:bg-amber-600 text-white font-bold flex items-center gap-2 shrink-0"
+                          onClick={() => {
+                            // Acción para romper el marrano (ej. eliminar el ahorro)
+                            if (window.confirm('¿Estás seguro de que quieres romper este marrano y retirar los fondos?')) {
+                              useFinanceStore.getState().deleteSaving(saving.id);
                             }
-                          }
-                        }}
-                      />
+                          }}
+                        >
+                          <Hammer className="w-5 h-5" />
+                          <span>Romper el marrano</span>
+                        </Button>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <Input
+                            type="number"
+                            step="1"
+                            placeholder="Abonar ($)"
+                            className="w-full sm:w-36 h-10 text-sm font-bold"
+                            id={`add-funds-${saving.id}`}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                const target = e.target as HTMLInputElement;
+                                if (target.value && !isNaN(Number(target.value))) {
+                                  const additional = new Decimal(target.value);
+                                  const newAmount = current.plus(additional).toString();
+                                  updateSavingAmount(saving.id, newAmount);
+                                  target.value = '';
+                                  target.blur();
+                                }
+                              }
+                            }}
+                          />
+                          <Button
+                            variant="primary"
+                            className="h-10 px-3 bg-emerald-600 hover:bg-emerald-700 shrink-0"
+                            onClick={() => {
+                              const input = document.getElementById(`add-funds-${saving.id}`) as HTMLInputElement;
+                              if (input && input.value && !isNaN(Number(input.value))) {
+                                const additional = new Decimal(input.value);
+                                const newAmount = current.plus(additional).toString();
+                                updateSavingAmount(saving.id, newAmount);
+                                input.value = '';
+                              }
+                            }}
+                          >
+                            <Plus className="w-5 h-5 text-white" />
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </Card>

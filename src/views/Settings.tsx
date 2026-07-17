@@ -86,7 +86,7 @@ export function Settings() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* User Profile Section - Expert UI Redesign */}
-        <Card className="space-y-8 border-none shadow-sm bg-white p-8 md:p-10">
+        <Card className="space-y-8 border-none shadow-sm bg-white p-8 md:p-10 lg:col-span-2">
           <div className="flex items-center gap-4 border-b border-slate-50 pb-6">
             <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center">
               <User className="w-6 h-6 text-emerald-700" />
@@ -250,10 +250,25 @@ export function Settings() {
               <div className="p-4 rounded-xl bg-blue-50 border border-blue-100">
                 <p className="text-xs text-blue-600 font-bold uppercase mb-2">Tu Código de Vinculación</p>
                 <p className="text-3xl font-mono tracking-widest text-blue-900">{linkCode}</p>
-                <p className="text-sm text-blue-700 mt-3">
-                  Ve a Telegram, busca nuestro bot y envía: <br/>
-                  <code className="font-bold">/link {linkCode}</code>
-                </p>
+                <div className="text-sm text-blue-700 mt-3 space-y-2">
+                  <p>
+                    Abre el bot de Telegram en{' '}
+                    <a 
+                      href="https://t.me/finanzas_aite_bot" 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="font-bold underline hover:text-blue-800"
+                    >
+                      @finanzas_aite_bot
+                    </a>
+                  </p>
+                  <p>
+                    Y envía el siguiente mensaje: <br/>
+                    <code className="font-bold mt-1 inline-block bg-white/50 px-2 py-1 rounded border border-blue-200">
+                      /link {linkCode}
+                    </code>
+                  </p>
+                </div>
               </div>
             ) : (
               <Button 
