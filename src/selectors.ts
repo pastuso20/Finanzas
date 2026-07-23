@@ -41,6 +41,5 @@ export function selectNetWorth(state: FinanceSnapshot): Decimal {
   return selectActiveInvestmentsValue(state.investments)
     .plus(selectActiveLoansPrincipal(state.loans))
     .plus(selectCashBalance(state))
-    .plus(selectTotalSavings(state.savings))
     .minus(selectPendingDebts(state.debts));
 }
