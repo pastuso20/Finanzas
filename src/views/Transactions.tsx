@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useFinanceStore } from '../store';
 import { Card, Button, Input, Label, cn } from '../components/ui';
-import { Plus, Minus, Search, ArrowUpRight, ArrowDownRight, Wallet, Filter, X } from 'lucide-react';
+import { Plus, Minus, Search, ArrowUpRight, ArrowDownRight, Wallet, Filter, X, ArrowRight } from 'lucide-react';
 import Decimal from 'decimal.js';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -212,33 +212,36 @@ export function Transactions() {
       {/* Transaction List */}
       <div className="space-y-4 notranslate">
         {filteredTransactions.length > 0 ? (
-          filteredTransactions.map(tx => (
-            <div key={tx.id} className="bg-white p-4 rounded-3xl border border-slate-50 shadow-sm flex items-center justify-between active:scale-[0.98] transition-all">
-              <div className="flex items-center gap-4">
-                <div className={cn(
-                  "w-12 h-12 rounded-2xl flex items-center justify-center",
-                  tx.type === 'income' ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-500"
-                )}>
-                  {tx.type === 'income' ? <ArrowUpRight className="w-6 h-6" /> : <ArrowDownRight className="w-6 h-6" />}
+          filteredTransactions.map(tx => {
+            const isSaving = tx.category === 'Ahorro';
+            return (
+              <div key={tx.id} className="bg-white p-4 rounded-3xl border border-slate-50 shadow-sm flex items-center justify-between active:scale-[0.98] transition-all">
+                <div className="flex items-center gap-4">
+                  <div className={cn(
+                    "w-12 h-12 rounded-2xl flex items-center justify-center",
+                    isSaving ? "bg-blue-50 text-blue-500" : (tx.type === 'income' ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-500")
+                  )}>
+                    {isSaving ? <ArrowRight className="w-6 h-6" /> : (tx.type === 'income' ? <ArrowUpRight className="w-6 h-6" /> : <ArrowDownRight className="w-6 h-6" />)}
+                  </div>
+                  <div>
+                    <p className="font-bold text-emerald-900 text-base"><span>{tx.category}</span></p>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">
+                      <span>{format(new Date(tx.date), "dd 'de' MMM, yyyy", { locale: es })}</span>
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-bold text-emerald-900 text-base"><span>{tx.category}</span></p>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">
-                    <span>{format(new Date(tx.date), "dd 'de' MMM, yyyy", { locale: es })}</span>
+                <div className="text-right">
+                  <p className={cn(
+                    "font-mono font-bold text-lg",
+                    isSaving ? "text-blue-600" : (tx.type === 'income' ? "text-emerald-700" : "text-rose-600")
+                  )}>
+                    <span>{tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}</span>
                   </p>
+                  {tx.notes && <p className="text-[9px] text-slate-400 mt-0.5 italic max-w-[100px] truncate"><span>{tx.notes}</span></p>}
                 </div>
               </div>
-              <div className="text-right">
-                <p className={cn(
-                  "font-mono font-bold text-lg",
-                  tx.type === 'income' ? "text-emerald-700" : "text-rose-600"
-                )}>
-                  <span>{tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}</span>
-                </p>
-                {tx.notes && <p className="text-[9px] text-slate-400 mt-0.5 italic max-w-[100px] truncate"><span>{tx.notes}</span></p>}
-              </div>
-            </div>
-          ))
+            );
+          })
         ) : (
           <div key="empty-state" className="py-20 flex flex-col items-center justify-center text-center animate-in fade-in zoom-in duration-500">
             <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-6">

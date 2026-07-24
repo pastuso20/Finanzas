@@ -3,6 +3,7 @@ import { supabase } from '../supabase';
 import { useFinanceStore } from '../store';
 import { motion, AnimatePresence } from 'motion/react';
 import { Lock, Mail, ArrowRight, Sparkles, Shield, Zap } from 'lucide-react';
+import { CardSpotlight } from '../components/ui/card-spotlight';
 
 export default function Login() {
   const [isLogin, setIsLogin] = useState(true);
@@ -146,13 +147,21 @@ export default function Login() {
         className="w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden relative z-10 transition-all duration-500 ease-in-out"
       >
         <div className="flex flex-col lg:flex-row">
-          {/* Left Welcome Section */}
-          <div className="lg:w-1/2 bg-gradient-to-br from-emerald-600 to-green-700 p-8 lg:p-12 flex flex-col justify-center items-center text-white text-center">
+          {/* Left Welcome Section with Spotlight */}
+          <CardSpotlight 
+            color="transparent"
+            dotColors={[
+              [16, 185, 129], // Emerald 500
+              [4, 120, 87],   // Emerald 700
+              [255, 255, 255] // White
+            ]}
+            className="lg:w-1/2 bg-gradient-to-br from-emerald-600 to-green-700 p-8 lg:p-12 flex flex-col justify-center items-center text-white text-center rounded-none lg:rounded-l-3xl relative overflow-hidden"
+          >
             <motion.div
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
               transition={{ duration: 0.5, delay: 0.1, type: "spring", stiffness: 200 }}
-              className="mb-6 relative"
+              className="mb-6 relative z-10"
             >
               <motion.div
                 animate={{ rotate: 360 }}
@@ -160,7 +169,7 @@ export default function Login() {
                 className="absolute inset-0 border-2 border-emerald-400/30 rounded-3xl"
               />
               <div className="w-20 h-20 bg-gradient-to-br from-emerald-400 to-green-500 rounded-3xl flex items-center justify-center shadow-2xl shadow-emerald-500/30 backdrop-blur-xl border border-white/20 overflow-hidden">
-                <img src="/logo-login.png" alt="Cuido mi bolsillo" className="w-full h-full object-contain" />
+                <img src="/logo.webp" alt="Cuido mi bolsillo" className="w-full h-full object-contain" />
               </div>
             </motion.div>
             
@@ -169,7 +178,7 @@ export default function Login() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.2 }}
-              className="text-3xl lg:text-4xl font-bold mb-3"
+              className="text-3xl lg:text-4xl font-bold mb-3 relative z-10"
             >
               {isLogin ? '¡Bienvenido de nuevo!' : 'Únete a Prestige Finance'}
             </motion.h1>
@@ -178,19 +187,19 @@ export default function Login() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.3 }}
-              className="text-emerald-100 text-base lg:text-lg mb-6 leading-relaxed"
+              className="text-emerald-50 text-base lg:text-lg mb-6 leading-relaxed relative z-10"
             >
               {isLogin 
                 ? 'Puedes iniciar sesión para acceder con tu cuenta existente.'
                 : 'Crea tu cuenta ahora para tomar el control de tus finanzas personales.'}
             </motion.p>
-          </div>
+          </CardSpotlight>
 
           {/* Right Form Section */}
           <div className="lg:w-1/2 p-6 lg:p-10 bg-white relative">
             {/* Watermark Logo */}
             <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none">
-              <img src="/logo-login.png" alt="Watermark" className="w-48 h-48 object-contain" />
+              <img src="/logo.webp" alt="Watermark" className="w-48 h-48 object-contain" />
             </div>
             
             <div className="relative z-10">

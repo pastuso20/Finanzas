@@ -4,6 +4,7 @@ import { supabase } from '../supabase';
 import { LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from './ui';
 import { NAV_ITEMS, SETTINGS_NAV } from '../config/navigation';
+import { AIFinancialAdvisor } from './AIFinancialAdvisor';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -34,9 +35,9 @@ export function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
       <div className="md:hidden flex items-center justify-between p-6 z-30 relative shrink-0 bg-white/50 backdrop-blur-md">
         <div className="flex items-center justify-center">
           <img
-            src="/logo.png"
+            src="/logo.webp"
             alt={userName || 'User'}
-            className="w-24 h-24 object-contain"
+            className="w-12 h-12 md:w-16 md:h-16 object-cover rounded-2xl shadow-[0_8px_20px_rgb(0,0,0,0.15)] border border-white/60"
           />
         </div>
         <div className="flex gap-3">
@@ -69,20 +70,13 @@ export function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
           <div className="shrink-0 mt-8">
             <div className={cn("flex items-center mb-6", isCollapsed ? "justify-center" : "justify-center")}>
               <div className={cn(
-                "relative flex items-center justify-center",
-                isCollapsed ? "w-16 h-16" : "w-24 h-24"
+                "relative flex items-center justify-center mb-8",
+                isCollapsed ? "w-16 h-16" : "w-32 h-32"
               )}>
                 <img
-                  src="/logo.png"
+                  src="/logo.webp"
                   alt="Logo"
-                  className="object-contain origin-center"
-                  style={{
-                    '--tw-scale-x': '120%',
-                    '--tw-scale-y': '120%',
-                    '--tw-scale-z': '120%',
-                    transform: 'scaleX(120%) scaleY(120%) scaleZ(120%)',
-                    marginBottom: '3rem'
-                  } as React.CSSProperties}
+                  className="w-full h-full object-cover rounded-[1.5rem] md:rounded-[2rem] shadow-[0_10px_30px_rgb(0,0,0,0.15)] border-2 border-white/50 shadow-inner"
                 />
               </div>
             </div>
@@ -180,6 +174,9 @@ export function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
           })}
         </div>
       </div>
+
+      {/* Floating AI Assistant */}
+      <AIFinancialAdvisor />
     </div>
   );
 }

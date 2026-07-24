@@ -2,8 +2,9 @@ import React, { useState, useMemo } from 'react';
 import { useFinanceStore } from '../store';
 import { Card, cn } from '../components/ui';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
-import { TrendingUp, TrendingDown, AlertCircle, DollarSign, Activity, Filter, PieChart as PieChartIcon, HandCoins, MessageCircle, Send } from 'lucide-react';
+import { TrendingUp, TrendingDown, AlertCircle, DollarSign, Activity, Filter, PieChart as PieChartIcon, HandCoins, MessageCircle, Send, ArrowRight } from 'lucide-react';
 import { CardSpotlight } from '../components/ui/card-spotlight';
+import { HealthScore } from '../components/HealthScore';
 import { format, isBefore, addDays } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { formatCurrency, safeDate } from '../utils';
@@ -138,41 +139,50 @@ export function Dashboard() {
   return (
     <div className="space-y-6 md:space-y-10 animate-in fade-in duration-500 pb-20 md:pb-0" translate="no">
       {/* Refined Header - Expert UI */}
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 md:gap-0">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-start gap-6 md:gap-0">
         <div className="flex flex-col w-full md:max-w-md lg:max-w-xl">
           <h2 className="text-3xl md:text-5xl font-bold text-emerald-900 tracking-tight font-serif"><span>Resumen General</span></h2>
           <p className="text-slate-400 text-sm md:text-base mt-2"><span>Tu centro de comando financiero</span></p>
 
           {/* Smart Contextual Banner */}
-          <CardSpotlight 
-            className="w-full mt-6 rounded-[1.5rem] shadow-[0_8px_30px_rgb(34,158,217,0.15)] border border-[#2AABEE]/20 p-6 flex flex-col xl:flex-row items-center justify-between text-slate-800 overflow-hidden relative cursor-pointer bg-white"
-            color="#f0f9ff"
-          >
-            <div className="absolute -right-10 -top-10 w-32 h-32 bg-[#2AABEE]/5 rounded-full blur-2xl pointer-events-none" />
-            <div className="absolute -left-10 -bottom-10 w-24 h-24 bg-[#2AABEE]/5 rounded-full blur-2xl pointer-events-none" />
-            <div className="relative z-10 flex-1 pr-4 mb-4 xl:mb-0">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="bg-[#2AABEE]/10 p-1.5 rounded-lg">
-                  <Send className="w-4 h-4 text-[#229ED9]" />
+          {!useFinanceStore(state => state.telegramChatId) && (
+            <CardSpotlight 
+              className="w-full mt-6 rounded-[1.5rem] shadow-[0_8px_30px_rgb(34,158,217,0.15)] border border-[#2AABEE]/20 p-6 flex flex-col xl:flex-row items-center justify-between text-slate-800 overflow-hidden relative cursor-pointer bg-white"
+              color="#f0f9ff"
+            >
+              <div className="absolute -right-10 -top-10 w-32 h-32 bg-[#2AABEE]/5 rounded-full blur-2xl pointer-events-none" />
+              <div className="absolute -left-10 -bottom-10 w-24 h-24 bg-[#2AABEE]/5 rounded-full blur-2xl pointer-events-none" />
+              <div className="relative z-10 flex-1 pr-4 mb-4 xl:mb-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="bg-[#2AABEE]/10 p-1.5 rounded-lg">
+                    <Send className="w-4 h-4 text-[#229ED9]" />
+                  </div>
+                  <h3 className="text-lg font-bold tracking-tight text-slate-900">Registro Rápido</h3>
                 </div>
-                <h3 className="text-lg font-bold tracking-tight text-slate-900">Registro Rápido</h3>
+                <p className="text-slate-600 text-xs sm:text-sm leading-relaxed mt-1">
+                  ¿Quieres registrar gastos en 3 segundos? Vincula nuestro bot de Telegram.
+                </p>
               </div>
-              <p className="text-slate-600 text-xs sm:text-sm leading-relaxed mt-1">
-                ¿Quieres registrar gastos en 3 segundos? Vincula nuestro bot de Telegram.
-              </p>
-            </div>
-            <div className="relative z-10 w-full xl:w-auto shrink-0">
-              <button 
-                onClick={() => window.dispatchEvent(new CustomEvent('navigate', { detail: 'settings' }))}
-                className="flex items-center justify-center w-full xl:w-auto px-5 py-2.5 bg-[#229ED9] text-white text-sm font-bold rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all text-center"
-              >
-                Vincular Bot
-              </button>
-            </div>
-          </CardSpotlight>
+              <div className="relative z-10 w-full xl:w-auto shrink-0">
+                <button 
+                  onClick={() => window.dispatchEvent(new CustomEvent('navigate', { detail: 'settings' }))}
+                  className="flex items-center justify-center w-full xl:w-auto px-5 py-2.5 bg-[#229ED9] text-white text-sm font-bold rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all text-center"
+                >
+                  Vincular Bot
+                </button>
+              </div>
+            </CardSpotlight>
+          )}
+
+          {/* Health Score - Moved here to balance layout */}
+          <div className="mt-6">
+            <HealthScore />
+          </div>
         </div>
 
-        {/* Patrimonio Neto - Mobile Premium UI */}
+        {/* Patrimonio Neto */}
+        <div className="flex flex-col gap-4 w-full md:w-auto">
+          {/* Patrimonio Neto - Mobile Premium UI */}
         <div className="w-full md:w-auto bg-white rounded-[2rem] md:rounded-[2.5rem] border border-slate-100 shadow-xl shadow-emerald-900/5 p-6 md:p-10 flex flex-col md:items-end justify-center relative overflow-hidden group notranslate min-h-[220px] md:min-h-[240px]">
           <div className="absolute top-0 right-0 w-24 h-24 md:w-32 md:h-32 bg-emerald-50/50 rounded-full -mr-12 -mt-12 md:-mr-16 md:-mt-16 transition-transform group-hover:scale-110" />
           
@@ -189,6 +199,7 @@ export function Dashboard() {
               <span>+12.5% este mes</span>
             </div>
           </div>
+        </div>
         </div>
       </header>
 
@@ -315,28 +326,31 @@ export function Dashboard() {
             <h3 className="text-base md:text-lg font-bold text-emerald-500 mb-4 md:mb-6 drop-shadow-sm"><span>Transacciones Recientes</span></h3>
             <div className="space-y-3 md:space-y-4 notranslate">
               {snapshot.transactions.length > 0 ? (
-                snapshot.transactions.slice(0, 4).map(tx => (
-                  <div key={tx.id} className="flex justify-between items-center neu-inset p-3 rounded-2xl transition-transform hover:-translate-y-1 hover:shadow-lg">
-                    <div className="flex items-center gap-3">
-                      <div className={cn(
-                        "w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center bg-white/40 shadow-sm border border-white/50",
-                        tx.type === 'income' ? "text-emerald-500" : "text-rose-500"
+                snapshot.transactions.slice(0, 4).map(tx => {
+                  const isSaving = tx.category === 'Ahorro';
+                  return (
+                    <div key={tx.id} className="flex justify-between items-center neu-inset p-3 rounded-2xl transition-transform hover:-translate-y-1 hover:shadow-lg">
+                      <div className="flex items-center gap-3">
+                        <div className={cn(
+                          "w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center bg-white/40 shadow-sm border border-white/50",
+                          isSaving ? "text-blue-500" : (tx.type === 'income' ? "text-emerald-500" : "text-rose-500")
+                        )}>
+                          {isSaving ? <ArrowRight className="w-4 h-4 md:w-5 md:h-5 text-blue-500" /> : (tx.type === 'income' ? <TrendingUp className="w-4 h-4 md:w-5 md:h-5" /> : <TrendingDown className="w-4 h-4 md:w-5 md:h-5" />)}
+                        </div>
+                        <div>
+                          <p className="text-xs md:text-sm font-bold text-charcoal-900 drop-shadow-sm"><span>{tx.category}</span></p>
+                          <p className="text-[10px] md:text-xs text-slate-500 font-bold uppercase tracking-wider mt-0.5"><span>{safeDate(tx.date) ? format(safeDate(tx.date)!, "dd 'de' MMM", { locale: es }) : '—'}</span></p>
+                        </div>
+                      </div>
+                      <p className={cn(
+                        "font-mono text-xs md:text-sm font-bold drop-shadow-sm",
+                        isSaving ? "text-blue-600" : (tx.type === 'income' ? "text-emerald-600" : "text-rose-600")
                       )}>
-                        {tx.type === 'income' ? <TrendingUp className="w-4 h-4 md:w-5 md:h-5" /> : <TrendingDown className="w-4 h-4 md:w-5 md:h-5" />}
-                      </div>
-                      <div>
-                        <p className="text-xs md:text-sm font-bold text-charcoal-900 drop-shadow-sm"><span>{tx.category}</span></p>
-                        <p className="text-[10px] md:text-xs text-slate-500 font-bold uppercase tracking-wider mt-0.5"><span>{safeDate(tx.date) ? format(safeDate(tx.date)!, "dd 'de' MMM", { locale: es }) : '—'}</span></p>
-                      </div>
+                        <span>{tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}</span>
+                      </p>
                     </div>
-                    <p className={cn(
-                      "font-mono text-xs md:text-sm font-bold drop-shadow-sm",
-                      tx.type === 'income' ? "text-emerald-600" : "text-rose-600"
-                    )}>
-                      <span>{tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}</span>
-                    </p>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <p className="text-xs md:text-sm text-slate-500 font-medium italic py-4"><span>Sin actividad reciente.</span></p>
               )}

@@ -7,11 +7,16 @@ export const CardSpotlight = ({
   children,
   radius = 350,
   color = "#262626",
+  dotColors = [
+    [59, 130, 246],
+    [139, 92, 246],
+  ],
   className,
   ...props
 }: {
   radius?: number;
   color?: string;
+  dotColors?: number[][];
   children: React.ReactNode;
 } & React.HTMLAttributes<HTMLDivElement>) => {
   const mouseX = useMotionValue(0);
@@ -50,10 +55,7 @@ export const CardSpotlight = ({
         <CanvasRevealEffect
           animationSpeed={5}
           containerClassName="bg-transparent absolute inset-0 pointer-events-none"
-          colors={[
-            [59, 130, 246],
-            [139, 92, 246],
-          ]}
+          colors={dotColors}
           dotSize={3}
         />
       </motion.div>

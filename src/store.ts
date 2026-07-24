@@ -22,6 +22,7 @@ interface FinanceState {
   savings: Saving[];
   isLoading: boolean;
   userId: string | null;
+  telegramChatId: number | null;
 
   // Actions
   fetchData: () => Promise<void>;
@@ -59,6 +60,7 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
   savings: [],
   isLoading: true,
   userId: null,
+  telegramChatId: null,
 
   setUserId: (id) => {
     set({ userId: id });
@@ -104,7 +106,7 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
       if (svgsError) console.error('Supabase Savings Error:', svgsError.message);
 
       if (profile) {
-        set({ userName: profile.user_name, initialBalance: profile.initial_balance.toString() });
+        set({ userName: profile.user_name, initialBalance: profile.initial_balance.toString(), telegramChatId: profile.telegram_chat_id || null });
       } else if (!profileError) {
         // Auto-create profile if it doesn't exist and there was no fetch error
         console.log('Profile not found, creating one for user:', currentUserId);
@@ -123,7 +125,7 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
         if (createError) {
           console.error('Error auto-creating profile:', createError.message);
         } else if (newProfile) {
-          set({ userName: newProfile.user_name, initialBalance: newProfile.initial_balance.toString() });
+          set({ userName: newProfile.user_name, initialBalance: newProfile.initial_balance.toString(), telegramChatId: newProfile.telegram_chat_id || null });
         }
       }
 

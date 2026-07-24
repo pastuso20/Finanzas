@@ -43,7 +43,7 @@ export interface NlpResult {
 }
 
 export const NlpService = {
-  async processMessage(message: string, existingCategories: string[], existingSavings: any[] = [], balanceContext: any = null): Promise<NlpResult> {
+  async processMessage(message: string, existingCategories: string[], existingSavings: any[] = [], balanceContext: any = null, history: { role: 'user' | 'assistant', content: string }[] = []): Promise<NlpResult> {
     const prompt = `
       You are a financial assistant bot. Analyze the user's message.
       Existing transaction categories: ${existingCategories.join(', ')}.
@@ -86,13 +86,15 @@ export const NlpService = {
         "queryResponse": "string (only if intent is query - answer their question based on context)"
       }
       (Omit the properties that are not relevant to the chosen intent)
-
-      Message: "${message}"
     `;
 
     try {
+      const messages: any[] = [{ role: 'system', content: prompt }];
+      history.forEach(h => messages.push({ role: h.role, content: h.content }));
+      messages.push({ role: 'user', content: message });
+
       const response = await groq.chat.completions.create({
-        messages: [{ role: 'user', content: prompt }],
+        messages,
         model: 'llama-3.3-70b-versatile',
         response_format: { type: 'json_object' }
       });
@@ -127,6 +129,41 @@ export const NlpService = {
     } catch (error) {
       console.error('Groq API Error:', error);
       return 'Ocurrió un error al procesar tu consulta.';
+    }
+  },
+
+  async generateHealthReport(snapshot: any): Promise<any> {
+    const prompt = `
+      You are an expert financial advisor. Analyze the following financial snapshot of a user.
+      Snapshot data: ${JSON.stringify(snapshot)}
+      
+      Generate a brief financial health checkup report.
+      Provide EXACTLY one JSON object with the following structure (no markdown blocks, just raw JSON):
+      {
+        "achievement": "One sentence praising a positive aspect of their finances (e.g. good savings, low debt, consistent income). Use an emoji.",
+        "warning": "One sentence highlighting a potential risk or area of improvement (e.g. high debt ratio, low liquid assets). Use an emoji.",
+        "action_item": "One clear, actionable tip to improve their financial health this week. Use an emoji."
+      }
+      If the snapshot is empty or very limited, encourage them to add more data.
+      Keep the sentences concise and in Spanish.
+    `;
+
+    try {
+      const response = await groq.chat.completions.create({
+        messages: [{ role: 'user', content: prompt }],
+        model: 'llama-3.3-70b-versatile',
+        response_format: { type: 'json_object' }
+      });
+
+      const responseText = response.choices[0]?.message?.content || '{}';
+      return JSON.parse(responseText);
+    } catch (error) {
+      console.error('Groq API Error (Health Report):', error);
+      return {
+        achievement: "¡Qué bueno que estás revisando tus finanzas! 🌟",
+        warning: "Aún no tengo suficientes datos para darte un análisis profundo. 📊",
+        action_item: "Registra todos tus gastos de la semana para tener una mejor visión. 📝"
+      };
     }
   }
 };
