@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useFinanceStore } from '../store';
 import { supabase } from '../supabase';
-import { LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LogOut, ChevronLeft, ChevronRight, DollarSign, X } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from './ui';
 import { NAV_ITEMS, SETTINGS_NAV } from '../config/navigation';
 import { AIFinancialAdvisor } from './AIFinancialAdvisor';
@@ -14,6 +15,7 @@ interface LayoutProps {
 
 export function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const userName = useFinanceStore(state => state.userName);
   const setUserId = useFinanceStore(state => state.setUserId);
   const SettingsIcon = SETTINGS_NAV.icon;
@@ -67,8 +69,8 @@ export function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
             {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
           </button>
 
-          <div className="shrink-0 mt-8">
-            <div className={cn("flex items-center mb-6", isCollapsed ? "justify-center" : "justify-center")}>
+          <div className="shrink-0 mt-8 relative">
+            <div className={cn("flex items-center mb-6 relative w-full", isCollapsed ? "justify-center" : "justify-center")}>
               <div className={cn(
                 "relative flex items-center justify-center mb-8",
                 isCollapsed ? "w-16 h-16" : "w-32 h-32"
@@ -78,6 +80,27 @@ export function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
                   alt="Logo"
                   className="w-full h-full object-cover rounded-[1.5rem] md:rounded-[2rem] shadow-[0_10px_30px_rgb(0,0,0,0.15)] border-2 border-white/50 shadow-inner"
                 />
+              </div>
+
+              {/* Botones de configuración y salir (Top Right) */}
+              <div className={cn(
+                "absolute top-0 right-0 flex flex-col gap-2 transition-opacity duration-300",
+                isCollapsed ? "opacity-0 pointer-events-none" : "opacity-100"
+              )}>
+                <button
+                  onClick={() => setActiveTab(SETTINGS_NAV.id)}
+                  className="p-2 rounded-full bg-white shadow-sm border border-slate-100 text-slate-400 hover:text-emerald-600 transition-all hover:scale-105 active:scale-95"
+                  title="Configuración"
+                >
+                  <SettingsIcon className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="p-2 rounded-full bg-white shadow-sm border border-slate-100 text-slate-400 hover:text-rose-600 transition-all hover:scale-105 active:scale-95"
+                  title="Cerrar Sesión"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
               </div>
             </div>
 
@@ -114,18 +137,6 @@ export function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
                 );
               })}
             </nav>
-
-            <div className="flex gap-3 justify-center mt-auto pt-4">
-              <button
-                onClick={() => setActiveTab(SETTINGS_NAV.id)}
-                className="p-2.5 rounded-full bg-white shadow-sm border border-slate-100 text-slate-400 hover:text-emerald-600 transition-all"
-              >
-                <SettingsIcon className="w-5 h-5" />
-              </button>
-              <button onClick={handleLogout} className="p-2.5 rounded-full bg-white shadow-sm border border-slate-100 text-slate-400 hover:text-rose-600 transition-all">
-                <LogOut className="w-5 h-5" />
-              </button>
-            </div>
           </div>
 
         </aside>
@@ -144,19 +155,22 @@ export function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
         </div>
       </main>
 
-      {/* Mobile Bottom Navigation Bar (All 6 items) */}
-      <div className="md:hidden fixed bottom-4 left-4 right-4 z-50 safe-bottom">
-        <div className="bg-white/90 backdrop-blur-lg border border-slate-100 shadow-2xl rounded-[2.5rem] p-2 flex justify-between items-center relative overflow-hidden">
-          {NAV_ITEMS.map((item) => {
+      {/* Mobile Bottom Navigation Bar (Nequi Style) */}
+      <div className="md:hidden fixed bottom-4 left-4 right-4 z-[60] safe-bottom flex gap-3">
+        {/* Left Side (Main items) */}
+        <div className="bg-white/90 backdrop-blur-lg border border-slate-100 shadow-xl rounded-[2rem] p-2 flex flex-1 justify-around items-center relative overflow-hidden">
+          {NAV_ITEMS.filter(i => ['dashboard', 'transactions', 'savings'].includes(i.id)).map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
-
             return (
               <button
                 key={item.id}
-                onClick={() => setActiveTab(item.id)}
+                onClick={() => {
+                  setActiveTab(item.id);
+                  setIsMobileMenuOpen(false);
+                }}
                 className={cn(
-                  "flex flex-col items-center justify-center w-full h-14 rounded-2xl transition-all duration-300 relative z-10",
+                  "flex flex-col items-center justify-center w-full h-12 rounded-2xl transition-all duration-300 relative z-10",
                   isActive ? "text-emerald-800" : "text-slate-400"
                 )}
               >
@@ -173,7 +187,85 @@ export function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
             );
           })}
         </div>
+
+        {/* Right Side (Action Button) */}
+        <button
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className={cn(
+            "w-16 h-16 shrink-0 rounded-[2rem] shadow-xl flex items-center justify-center text-white transition-all duration-300 border-2 border-white",
+            isMobileMenuOpen ? "bg-emerald-800 rotate-45" : "bg-emerald-600 hover:bg-emerald-700 hover:scale-105 active:scale-95"
+          )}
+        >
+          {isMobileMenuOpen ? <X size={26} /> : <DollarSign size={26} />}
+        </button>
       </div>
+
+      {/* Mobile Popup Menu */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="md:hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[55]"
+            />
+            {/* Menu Items */}
+            <motion.div
+              initial={{ opacity: 0, y: 50, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 50, scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              className="md:hidden fixed bottom-24 left-4 right-4 z-[60] bg-white rounded-3xl shadow-2xl p-6 border border-slate-100"
+            >
+              <h3 className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-4">Más Servicios</h3>
+              <div className="grid grid-cols-3 gap-y-6 gap-x-2">
+                {NAV_ITEMS.filter(i => !['dashboard', 'transactions', 'savings'].includes(i.id)).map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        setActiveTab(item.id);
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="flex flex-col items-center justify-center gap-2 rounded-2xl group active:scale-95 transition-transform"
+                    >
+                      <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-100 transition-colors">
+                        <Icon size={22} />
+                      </div>
+                      <span className="text-xs font-medium text-slate-600 text-center">{item.mobileLabel ?? item.label}</span>
+                    </button>
+                  );
+                })}
+                <button
+                  onClick={() => {
+                    setActiveTab('settings');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="flex flex-col items-center justify-center gap-2 rounded-2xl group active:scale-95 transition-transform"
+                >
+                  <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center group-hover:bg-slate-200 transition-colors">
+                    <SettingsIcon size={22} />
+                  </div>
+                  <span className="text-xs font-medium text-slate-600 text-center">Ajustes</span>
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="flex flex-col items-center justify-center gap-2 rounded-2xl group active:scale-95 transition-transform"
+                >
+                  <div className="w-12 h-12 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center group-hover:bg-rose-100 transition-colors">
+                    <LogOut size={22} />
+                  </div>
+                  <span className="text-xs font-medium text-slate-600 text-center">Salir</span>
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* Floating AI Assistant */}
       <AIFinancialAdvisor />

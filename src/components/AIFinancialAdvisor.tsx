@@ -55,10 +55,10 @@ export const AIFinancialAdvisor: React.FC = () => {
   };
 
   return (
-    <div className="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-50 flex flex-col items-end">
+    <div className="fixed bottom-28 right-4 md:bottom-8 md:right-8 z-50 flex flex-col items-end">
       {/* Tooltip / Modal */}
       {isOpen && (
-        <div className="mb-4 bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-200/60 w-[320px] md:w-[380px] overflow-hidden animate-in zoom-in-95 duration-200 origin-bottom-right">
+        <div className="mb-4 bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-200/60 w-[320px] md:w-[380px] max-h-[65vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 origin-bottom-right">
           <div className="p-4 bg-white border-b border-slate-100 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="p-1 rounded-lg">
@@ -71,7 +71,7 @@ export const AIFinancialAdvisor: React.FC = () => {
             </button>
           </div>
           
-          <div className="p-5 bg-slate-50/50">
+          <div className="p-5 bg-slate-50/50 flex-1 overflow-y-auto">
             {loading ? (
               <div className="flex flex-col items-center justify-center py-8 gap-3 text-emerald-600">
                 <RefreshCw size={28} className="animate-spin" />

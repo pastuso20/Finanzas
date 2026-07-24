@@ -322,40 +322,43 @@ export function Dashboard() {
           </div>
         </Card>
 
-          <Card>
-            <h3 className="text-base md:text-lg font-bold text-emerald-500 mb-4 md:mb-6 drop-shadow-sm"><span>Transacciones Recientes</span></h3>
-            <div className="space-y-3 md:space-y-4 notranslate">
-              {snapshot.transactions.length > 0 ? (
-                snapshot.transactions.slice(0, 4).map(tx => {
-                  const isSaving = tx.category === 'Ahorro';
-                  return (
-                    <div key={tx.id} className="flex justify-between items-center neu-inset p-3 rounded-2xl transition-transform hover:-translate-y-1 hover:shadow-lg">
-                      <div className="flex items-center gap-3">
-                        <div className={cn(
-                          "w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center bg-white/40 shadow-sm border border-white/50",
-                          isSaving ? "text-blue-500" : (tx.type === 'income' ? "text-emerald-500" : "text-rose-500")
+          {/* Transacciones Recientes (Solo Escritorio) */}
+          <div className="hidden lg:block">
+            <Card>
+              <h3 className="text-base md:text-lg font-bold text-emerald-500 mb-4 md:mb-6 drop-shadow-sm"><span>Transacciones Recientes</span></h3>
+              <div className="space-y-3 md:space-y-4 notranslate">
+                {snapshot.transactions.length > 0 ? (
+                  snapshot.transactions.slice(0, 4).map(tx => {
+                    const isSaving = tx.category === 'Ahorro';
+                    return (
+                      <div key={tx.id} className="flex justify-between items-center neu-inset p-3 rounded-2xl transition-transform hover:-translate-y-1 hover:shadow-lg">
+                        <div className="flex items-center gap-3">
+                          <div className={cn(
+                            "w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center bg-white/40 shadow-sm border border-white/50",
+                            isSaving ? "text-blue-500" : (tx.type === 'income' ? "text-emerald-500" : "text-rose-500")
+                          )}>
+                            {isSaving ? <ArrowRight className="w-4 h-4 md:w-5 md:h-5 text-blue-500" /> : (tx.type === 'income' ? <TrendingUp className="w-4 h-4 md:w-5 md:h-5" /> : <TrendingDown className="w-4 h-4 md:w-5 md:h-5" />)}
+                          </div>
+                          <div>
+                            <p className="text-xs md:text-sm font-bold text-charcoal-900 drop-shadow-sm"><span>{tx.category}</span></p>
+                            <p className="text-[10px] md:text-xs text-slate-500 font-bold uppercase tracking-wider mt-0.5"><span>{safeDate(tx.date) ? format(safeDate(tx.date)!, "dd 'de' MMM", { locale: es }) : '—'}</span></p>
+                          </div>
+                        </div>
+                        <p className={cn(
+                          "font-mono text-xs md:text-sm font-bold drop-shadow-sm",
+                          isSaving ? "text-blue-600" : (tx.type === 'income' ? "text-emerald-600" : "text-rose-600")
                         )}>
-                          {isSaving ? <ArrowRight className="w-4 h-4 md:w-5 md:h-5 text-blue-500" /> : (tx.type === 'income' ? <TrendingUp className="w-4 h-4 md:w-5 md:h-5" /> : <TrendingDown className="w-4 h-4 md:w-5 md:h-5" />)}
-                        </div>
-                        <div>
-                          <p className="text-xs md:text-sm font-bold text-charcoal-900 drop-shadow-sm"><span>{tx.category}</span></p>
-                          <p className="text-[10px] md:text-xs text-slate-500 font-bold uppercase tracking-wider mt-0.5"><span>{safeDate(tx.date) ? format(safeDate(tx.date)!, "dd 'de' MMM", { locale: es }) : '—'}</span></p>
-                        </div>
+                          <span>{tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}</span>
+                        </p>
                       </div>
-                      <p className={cn(
-                        "font-mono text-xs md:text-sm font-bold drop-shadow-sm",
-                        isSaving ? "text-blue-600" : (tx.type === 'income' ? "text-emerald-600" : "text-rose-600")
-                      )}>
-                        <span>{tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}</span>
-                      </p>
-                    </div>
-                  );
-                })
-              ) : (
-                <p className="text-xs md:text-sm text-slate-500 font-medium italic py-4"><span>Sin actividad reciente.</span></p>
-              )}
-            </div>
-          </Card>
+                    );
+                  })
+                ) : (
+                  <p className="text-xs md:text-sm text-slate-500 font-medium italic py-4"><span>Sin actividad reciente.</span></p>
+                )}
+              </div>
+            </Card>
+          </div>
         </div>
 
         {/* Side Panel: Distribution */}
@@ -398,6 +401,44 @@ export function Dashboard() {
               )}
             </div>
           </Card>
+
+          {/* Transacciones Recientes (Solo Móvil) */}
+          <div className="block lg:hidden">
+            <Card>
+              <h3 className="text-base md:text-lg font-bold text-emerald-500 mb-4 md:mb-6 drop-shadow-sm"><span>Transacciones Recientes</span></h3>
+              <div className="space-y-3 md:space-y-4 notranslate">
+                {snapshot.transactions.length > 0 ? (
+                  snapshot.transactions.slice(0, 4).map(tx => {
+                    const isSaving = tx.category === 'Ahorro';
+                    return (
+                      <div key={tx.id} className="flex justify-between items-center neu-inset p-3 rounded-2xl transition-transform hover:-translate-y-1 hover:shadow-lg">
+                        <div className="flex items-center gap-3">
+                          <div className={cn(
+                            "w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center bg-white/40 shadow-sm border border-white/50",
+                            isSaving ? "text-blue-500" : (tx.type === 'income' ? "text-emerald-500" : "text-rose-500")
+                          )}>
+                            {isSaving ? <ArrowRight className="w-4 h-4 md:w-5 md:h-5 text-blue-500" /> : (tx.type === 'income' ? <TrendingUp className="w-4 h-4 md:w-5 md:h-5" /> : <TrendingDown className="w-4 h-4 md:w-5 md:h-5" />)}
+                          </div>
+                          <div>
+                            <p className="text-xs md:text-sm font-bold text-charcoal-900 drop-shadow-sm"><span>{tx.category}</span></p>
+                            <p className="text-[10px] md:text-xs text-slate-500 font-bold uppercase tracking-wider mt-0.5"><span>{safeDate(tx.date) ? format(safeDate(tx.date)!, "dd 'de' MMM", { locale: es }) : '—'}</span></p>
+                          </div>
+                        </div>
+                        <p className={cn(
+                          "font-mono text-xs md:text-sm font-bold drop-shadow-sm",
+                          isSaving ? "text-blue-600" : (tx.type === 'income' ? "text-emerald-600" : "text-rose-600")
+                        )}>
+                          <span>{tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}</span>
+                        </p>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <p className="text-xs md:text-sm text-slate-500 font-medium italic py-4"><span>Sin actividad reciente.</span></p>
+                )}
+              </div>
+            </Card>
+          </div>
         </div>
       </div>
     </div>
